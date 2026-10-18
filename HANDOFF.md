@@ -8,34 +8,36 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 
 ## 2. Current State
 
-- Step 1 (requirements) and step 2 (design with all 15 diagrams from brief section 6.3) are approved by the owner (2026-10-18), and committed to `main`.
-- Ready for step 3.
-- Decisions D-001 to D-025 recorded. Open questions Q4 to Q10 remain in [PRD section 8](docs/PRD.md#8-open-questions); none block step 3.
+- Steps 1 (requirements), 2 (design, 15 diagrams) and 3 (repository setup) are done. Steps 1 and 2 were approved by the owner on 2026-10-18.
+- The app is a placeholder page. CI runs lint, format, typecheck, unit tests, build, bundle check, dependency audit, end-to-end tests and a PR title check on every pull request.
+- `main` is protected ([D-026](docs/DECISIONS.md#d-026-protected-main-squash-merges-conventional-commit-titles)): pull requests only, CI must pass, squash merges, admins included.
 - Deferred by the owner: hosting ([D-003](docs/DECISIONS.md#d-003-hosting-deferred)) and the Messenger bot ([D-004](docs/DECISIONS.md#d-004-messenger-bot-deferred)). Steps 7 and 10 wait for the owner's go-ahead.
-- Repository: https://github.com/thatguyKire/seoul-mate-minimart (public). The owner approved committing the documents straight to `main`. From step 3 on, the brief's workflow applies: protected `main`, changes through pull requests that pass CI.
+- Open questions Q4 to Q10 remain in [PRD section 8](docs/PRD.md#8-open-questions); none block step 4.
 
 ## 3. Active Files
 
-- `docs/SDD.md`, `docs/ARCHITECTURE.md`, `docs/BACKEND-SCHEMA.md`, `docs/APP-FLOW.md` (step 2)
-- `docs/BRIEF.md`, `docs/PRD.md`, `docs/SRS.md`, `docs/TRD.md`, `docs/DECISIONS.md` (step 1)
-- `README.md`, `HANDOFF.md`
+- Tooling: `package.json`, `eslint.config.js`, `vite.config.ts`, `playwright.config.ts`, `tsconfig*.json`, `scripts/check-bundle.mjs`
+- GitHub: `.github/workflows/ci.yml`, `.github/dependabot.yml`, `.github/pull_request_template.md`
+- App: `index.html`, `src/`, `e2e/`, `public/favicon.svg`
+- Docs: `README.md`, `CHANGELOG.md`, `docs/DECISIONS.md` (D-026, D-027), `docs/TRD.md`
 
 ## 4. Changes Made
 
-- Created the GitHub repository and pushed the initial commit. Removed an em dash from the repository description.
-- Installed GitHub CLI 2.102.0 and logged in as `thatguyKire`, with git using that login.
-- Saved the owner's brief with all placeholders filled in as `docs/BRIEF.md`, then added the owner's answers: street address, Friday and Saturday hours confirmed, cash and GCash, no logo.
-- Wrote the step 1 and step 2 documents and checked that every internal link and anchor resolves.
-- Installed Node.js 24.20.0 (LTS). Rendered all 15 diagrams with Mermaid 11.12 in headless Microsoft Edge (via playwright-core, no browser download): no syntax errors, light and dark themes. The rendering tool lives in the session scratchpad, not in the repo.
-- Owner review page with all diagrams: https://claude.ai/artifact/A9EzTULr187orGF86kEAyo (private).
+- Created the GitHub repository; installed GitHub CLI and Node.js 24; logged in as `thatguyKire`.
+- Wrote and got approval for the step 1 and step 2 documents; owner review page for the diagrams: https://claude.ai/artifact/A9EzTULr187orGF86kEAyo (private).
+- Step 3: app skeleton, strict lint and type rules, unit and end-to-end tests, bundle checker, CI, Dependabot, branch protection, squash-merge settings, Dependabot security updates turned on.
+- Verified locally: lint rules reject `console`, `innerHTML`, `dangerouslySetInnerHTML` and accessibility mistakes; the bundle checker fails on a planted service role key, GitHub token and source map; the build contains no `console` calls; initial JavaScript is about 66 KB gzipped of the 170 KB budget.
 
 ## 5. Failed Attempts
 
-- `gh` was "not recognized" in the VS Code terminal right after installing it, because VS Code keeps the old PATH. Fix: fully quit and reopen VS Code, or call `C:\Program Files\GitHub CLI\gh.exe` directly.
+- `gh` and `node` were "not recognized" in terminals opened before they were installed. Fix: restart the terminal (fully quit VS Code), or use `C:\Program Files\GitHub CLI\gh.exe` and `C:\Program Files\nodejs`.
 - `winget` was not on PATH in the automation shell. Calling `%LOCALAPPDATA%\Microsoft\WindowsApps\winget.exe` directly worked.
-- First drafts of diagrams 6 (architecture), 7 (entity relationships), 8 (component tree) and 11 (live update) rendered 2,000 to 3,000 pixels wide, unreadable when scaled to a page. Fixed by switching three flowcharts to top-down, the component tree to left-to-right, trimming the live-update sequence to five participants, and dropping the comment column from the ER diagram. The ER diagram stays wide because Mermaid lays out unconnected tables in one row.
+- First drafts of diagrams 6, 7, 8 and 11 rendered 2,000 to 3,000 pixels wide. Fixed by changing layout directions and trimming; the ER diagram stays wide because Mermaid puts unconnected tables in one row.
+- `eslint-plugin-jsx-a11y` does not support ESLint 10 and is unmaintained; replaced by its fork ([D-027](docs/DECISIONS.md#d-027-accessibility-lint-rules-from-the-maintained-fork)).
+- On Windows, Playwright takes about two minutes to stop a preview server it started itself (the tests finish in seconds). Starting Vite directly instead of through npm did not help. Workaround: run `npm run preview:e2e` in another terminal first. CI runs on Linux and is not affected.
 
 ## 6. Next Steps
 
-1. Node.js is installed. Install Docker Desktop if possible (needed for the local Supabase stack). New terminals may need a restart to find `node` and `npm` on PATH.
-2. Step 3: repository setup (lint, format, typecheck, CI, `.env.example`, branch protection on `main`).
+1. Step 4, database: Supabase CLI, migrations for the schema in [BACKEND-SCHEMA.md](docs/BACKEND-SCHEMA.md), RLS policies, pgTAP tests proving RLS works, seed data with sample products.
+2. Local database tests need Docker Desktop. Without it, they run in CI only (GitHub's Linux runners have Docker).
+3. A Supabase account and the staging and production projects are needed before anything is deployed. The owner creates the account; that can wait until after step 4.
