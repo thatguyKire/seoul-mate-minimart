@@ -358,7 +358,7 @@ Tests are filled in during steps 4 to 9. Each range below is split into one row 
 | FR-48 to FR-53 | Messenger bot (Deferred) | [2.4](SDD.md#24-server-functions), [2.5](SDD.md#25-reply-engine-deferred), [3.3](SDD.md#33-messenger-webhook-deferred), [7.4](SDD.md#74-messenger-message-deferred), [7.5](SDD.md#75-bot-reply-logic-deferred) | Server function tests; reply engine unit tests |
 | FR-54 to FR-59 | Privacy, consent and legal | [2.2](SDD.md#22-public-site-modules) consent and legal, [7.3](SDD.md#73-cookie-consent-analytics-and-utm) | End-to-end tests asserting no analytics requests or storage before consent; legal review |
 | FR-60 to FR-69 | Layout and display | [2.2](SDD.md#22-public-site-modules) layout | End-to-end tests; manual keyboard and screen reader check |
-| NFR-SEC-01 to NFR-SEC-03 | Database access | [5.3](SDD.md#53-database-access) | Database tests (pgTAP) proving anonymous and non-admin writes fail |
+| NFR-SEC-01 to NFR-SEC-03 | Database access | [5.3](SDD.md#53-database-access) | `supabase/tests/database` files 01 to 04 (pgTAP), run in CI ([BACKEND-SCHEMA 8](BACKEND-SCHEMA.md#8-tests)) |
 | NFR-SEC-04 to NFR-SEC-18 | Other security | [5.2](SDD.md#52-threat-model-stride) and [5.4 to 5.9](SDD.md#54-staff-sessions) | Lint rules, CI dependency audit, bundle secret scan, header checks, injection tests |
 | NFR-PERF-01 to NFR-PERF-06 | Performance | [2.1](SDD.md#21-frontend-structure); ARCHITECTURE [5](ARCHITECTURE.md#5-caching) and [6](ARCHITECTURE.md#6-scaling) | Lighthouse CI; bundle size check in CI; search benchmark |
 | NFR-ACC-01 to NFR-ACC-07 | Accessibility | [2.2](SDD.md#22-public-site-modules) layout and i18n; `UI-UX.md` (step 8) | axe checks in end-to-end tests; manual audit |

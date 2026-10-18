@@ -108,7 +108,7 @@ All tables live in the `public` schema. Times are `timestamptz`, stored in UTC a
 | Column | Type | Rules |
 |---|---|---|
 | `id` | `uuid` | Primary key, `gen_random_uuid()` |
-| `category_id` | `uuid` | Required. References `categories`, on delete restrict, so a category with items cannot be deleted (FR-42) |
+| `category_id` | `uuid` | Required. References `categories` with the default `no action` rule, so a category with items cannot be deleted (FR-42). `no action` reports error `23503` on every Postgres version; `restrict` changed its error code in Postgres 18 |
 | `name_en` | `text` | Required, 1 to 80 characters |
 | `name_fil`, `name_ko` | `text` | Optional, 1 to 80 characters when set |
 | `description_en` | `text` | Required but may be empty, up to 500 characters |
@@ -179,15 +179,20 @@ Created in step 7, with the bot ([D-004](DECISIONS.md#d-004-messenger-bot-deferr
 
 ## 3. Row Level Security
 
-Every table has RLS enabled. With no matching policy, a role gets nothing (NFR-SEC-01). On top of RLS, table privileges are cut down: Supabase's default grants to `anon` and `authenticated` are revoked, and only the privileges below are granted back.
+Every table has RLS enabled. With no matching policy, a role gets nothing (NFR-SEC-01). On top of RLS, privileges are cut down, so RLS is never the only barrier:
 
-`is_admin()` is defined in [section 4.1](#41-functions). The service role, used only inside server functions, bypasses RLS.
+- Supabase's default grants of everything to `anon` and `authenticated` are revoked on all tables, and the default privileges are changed so future tables start with no client access. Only the privileges below are granted back.
+- Execute rights on every function are revoked from `public`, `anon` and `authenticated`, then granted per function ([section 4.1](#41-functions)). New functions are executable by everyone by default, so each migration must revoke and grant explicitly; the structural tests fail if it does not.
+- The GraphQL API is not exposed: only the `public` schema is served, through the Database API.
+
+`is_admin()` is defined in [section 4.1](#41-functions). Policies for `anon` never call it. The service role, used only inside server functions, bypasses RLS.
 
 | Table | Operation | Roles | Allowed when |
 |---|---|---|---|
 | `categories` | select | `anon`, `authenticated` | Always (category names are public) |
 | `categories` | insert, update, delete | `authenticated` | `is_admin()` |
-| `items` | select | `anon`, `authenticated` | `is_published` or `is_admin()` (FR-07) |
+| `items` | select | `anon` | `is_published` (FR-07) |
+| `items` | select | `authenticated` | `is_published` or `is_admin()` |
 | `items` | insert, update, delete | `authenticated` | `is_admin()` |
 | `admins` | select | `authenticated` | `user_id = auth.uid()`: staff see only their own row |
 | `admins` | insert, update, delete | none | Owner uses the dashboard |
@@ -208,7 +213,7 @@ Every function uses `SECURITY INVOKER` and `set search_path = ''`, and refers to
 
 | Function | Returns | Purpose | Callable by |
 |---|---|---|---|
-| `is_admin()` | `boolean` | True when the caller is in `admins`, and has a two-factor session if `require_mfa` is set | `anon`, `authenticated` (always false for `anon`) |
+| `is_admin()` | `boolean` | True when the caller is in `admins`, and has a two-factor session if `require_mfa` is set | `authenticated` |
 | `reorder_categories(p_ids uuid[])` | `void` | Sets `sort_order` from the array order, in one transaction. Raises an error if any row was not updated, which happens when RLS blocks the caller | `authenticated` |
 | `reorder_items(p_category_id uuid, p_ids uuid[])` | `void` | Same, for items within one category | `authenticated` |
 | `check_rate_limit(p_key text, p_max int, p_window_seconds int)` | `int` | Counts one hit in a fixed window with a single atomic upsert. Returns 0 if allowed, otherwise the seconds until the window resets (used for `Retry-After`) | `service_role` |
@@ -271,12 +276,12 @@ Run by `pg_cron`.
 | Setting | Value |
 |---|---|
 | Bucket | `item-photos` |
-| Public read | Yes, by direct URL only. No select policy exists, so nobody can list the bucket |
+| Public read | Yes, by direct URL only. Visitors have no select policy, so they cannot list the bucket. Staff can, because replacing and deleting files needs it |
 | Allowed types | `image/webp`, `image/jpeg` ([D-019](DECISIONS.md#d-019-photos-are-processed-in-the-staff-members-browser)) |
 | Size limit | 1 MB per file, after processing |
 | Path | `items/<item id>/<version>/<width>.<webp or jpg>`, with widths 320, 640 and 1024. `<version>` is the upload time in milliseconds, so a new photo never reuses a cached URL |
 | Cache header | `max-age=31536000` (one year), safe because paths never change |
-| Write policies on `storage.objects` | Insert, update and delete for `authenticated` when `bucket_id = 'item-photos'` and `is_admin()` (NFR-SEC-14) |
+| Policies on `storage.objects` | Select, insert, update and delete for `authenticated` when `bucket_id = 'item-photos'` and `is_admin()` (NFR-SEC-14). Inserts and updates must also match the path pattern above, so staff cannot write files anywhere else |
 
 When a photo is replaced or its item deleted, the admin panel deletes the old folder's files.
 
@@ -284,6 +289,19 @@ When a photo is replaced or its item deleted, the admin panel deletes the old fo
 
 Used only in local and staging databases ([TRD 3](TRD.md#3-environments)), never in production.
 
-- The four categories from the store's banner: Snacks and Drinks, Beauty and Skincare, Instant Noodles, Household Essentials.
-- About twelve sample items, all with `is_sample = true` and made-up prices, chosen to exercise the requirements: available and out-of-stock items (FR-04), one hidden item (FR-07), one without a photo (FR-03), and items missing Filipino or Korean text (FR-21).
-- One test staff account in the local database only. Staging and production staff accounts are created by the owner.
+- The four categories from the store's banner: Snacks and Drinks, Instant Noodles, Beauty and Skincare, Household Essentials.
+- Twelve sample items, all with `is_sample = true` and made-up prices, chosen to exercise the requirements: available and out-of-stock items (FR-04), one hidden item (FR-07), and items and a category missing Filipino or Korean text (FR-21). No photos yet, so every item shows the placeholder (FR-03).
+- No staff account ([D-028](DECISIONS.md#d-028-no-staff-account-in-seed-data)). A local-only staff account script comes with the admin panel in step 6. Staging and production staff accounts are created by the owner.
+
+## 8. Tests
+
+`supabase/tests/database` holds pgTAP tests that prove the rules above (NFR-SEC-01 to NFR-SEC-03). CI runs them against a real local Supabase stack on every pull request; `npm run db:test:pglite` runs them locally without Docker ([D-029](DECISIONS.md#d-029-local-database-tests-in-pglite-ci-as-the-source-of-truth)).
+
+| File | Proves |
+|---|---|
+| `01_structure.test.sql` | RLS on every table, no `SECURITY DEFINER`, fixed `search_path`, visitors cannot write anywhere or call any function, only the expected functions are callable when signed in |
+| `02_visitor_access.test.sql` | Visitors see published items only and are refused every write and every private table |
+| `03_signed_in_non_staff.test.sql` | A signed-in user who is not staff changes nothing and sees nothing private |
+| `04_staff_access.test.sql` | Staff can edit; one menu version bump per bulk change; audit fields cannot be faked; new items start hidden; the two-factor rule; photo path rule |
+| `05_rate_limit.test.sql` | Fixed windows, separate keys, retry time, invalid arguments |
+| `06_constraints.test.sql` | Length, format, price range, photo path, UTM keys, single-row menu version, category deletion |

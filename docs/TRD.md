@@ -24,7 +24,8 @@ Latest stable versions on 2026-10-18. The lockfile pins exact versions from step
 | Error tracking | Sentry | @sentry/react 11.x | |
 | Unit tests | Vitest, Testing Library, jsdom | 5.x, 16.x, 30.x | Component tests run in jsdom |
 | End-to-end tests | Playwright | 1.64.x | Includes axe accessibility checks (NFR-ACC-01) |
-| Database tests | pgTAP through `supabase test db` | | RLS proofs (NFR-SEC-01 to NFR-SEC-03) |
+| Database | Postgres through the Supabase CLI | CLI 2.121.x, Postgres 17 locally | Migrations in `supabase/migrations`, config in `supabase/config.toml` |
+| Database tests | pgTAP through `supabase test db`; PGlite with pgTAP locally | PGlite 0.5.x | RLS proofs (NFR-SEC-01 to NFR-SEC-03); PGlite only when Docker is missing ([D-029](DECISIONS.md#d-029-local-database-tests-in-pglite-ci-as-the-source-of-truth)) |
 | Lint and format | ESLint, typescript-eslint (strict, type-checked), Prettier | 10.x, 8.x, 3.x | Also bans `console` and raw HTML (NFR-SEC-10) |
 | Lint plugins | eslint-plugin-react-hooks, eslint-plugin-react-refresh, eslint-plugin-jsx-a11y-x | 7.x, 0.5.x, 0.2.x | Accessibility rules from the maintained fork ([D-027](DECISIONS.md#d-027-accessibility-lint-rules-from-the-maintained-fork)) |
 | Fonts | Fontsource variable fonts: Fredoka, Nunito, Noto Sans KR | 5.x | Self-hosted ([D-013](DECISIONS.md#d-013-self-hosted-fonts)) |

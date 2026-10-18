@@ -222,3 +222,19 @@ Each entry records one decision: date, context, the choice, and the alternatives
 - **Context:** `eslint-plugin-jsx-a11y` is the usual accessibility linter for React, but its last release was in October 2024 and it does not support ESLint 10. That makes it unmaintained by NFR-SEC-18's definition.
 - **Decision:** Use `eslint-plugin-jsx-a11y-x`, a fork by the es-tooling project that supports ESLint 10 (latest release May 2026, about 110,000 weekly downloads), with its strict preset. axe checks in the end-to-end tests (step 5 onward) cover what static rules cannot.
 - **Alternatives considered:** The original plugin with forced peer dependencies (rejected: unmaintained). Staying on ESLint 9 (rejected: its maintenance period has ended). No accessibility linting (rejected: catches problems earlier than end-to-end tests).
+
+## D-028: No staff account in seed data
+
+- **Date:** 2026-10-18
+- **Status:** Accepted
+- **Context:** The design planned one test staff account in the local seed data. `supabase/seed.sql` can also be applied to the staging project, which is reachable from the internet, and the seed file is public in this repository. A staff account created there would have a publicly known password.
+- **Decision:** `seed.sql` holds sample menu data only. A local staff account for testing the admin panel is created in step 6 by a separate script that refuses to run against anything but the local database. Staging and production staff accounts are created only by the owner.
+- **Alternatives considered:** A seeded staff account with a password from an environment variable (rejected: seed files cannot read environment variables, and a mistake would expose an admin account).
+
+## D-029: Local database tests in PGlite, CI as the source of truth
+
+- **Date:** 2026-10-18
+- **Status:** Accepted
+- **Context:** The real database tests need Docker for the local Supabase stack, and the development PC has no Docker. Pushing untested SQL and waiting for CI on every mistake is slow.
+- **Decision:** CI runs the pgTAP tests against a real local Supabase stack on every pull request; that result decides. During development, the same migrations, seed and test files can also run in PGlite (Postgres compiled to WebAssembly, with pgTAP) on top of a small imitation of Supabase's roles and schemas. The harness is `scripts/db-test-pglite.mjs` (`npm run db:test:pglite`), a development aid only. It found three real test bugs before the first push.
+- **Alternatives considered:** Installing Docker Desktop (still possible later; it needs WSL 2 and administrator rights). Testing only in CI (rejected as the only option: slow feedback).
