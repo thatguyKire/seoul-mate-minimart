@@ -15,11 +15,11 @@ Website for **Seoul-Mate Minimart**, *your one stop shop* for Korean goodies and
 
 ## Project status
 
-Steps 1 (requirements), 2 (design) and 3 (repository setup) of 11 are done. The site is a placeholder page until step 5 builds the menu. Progress and next steps are in [HANDOFF.md](HANDOFF.md).
+Steps 1 (requirements), 2 (design), 3 (repository setup) and 4 (database) of 11 are done. The site is a placeholder page until step 5 builds the menu. Progress and next steps are in [HANDOFF.md](HANDOFF.md).
 
 ## Local setup
 
-Requirements: Node.js 24 or later (see `.nvmrc`) and Git.
+Requirements: Node.js 24 or later (see `.nvmrc`) and Git. Docker Desktop is needed only to run the local Supabase stack; without it, use `npm run db:test:pglite` for the database tests.
 
 ```sh
 npm ci                       # install exact versions from package-lock.json
@@ -54,6 +54,11 @@ Server secrets never go in `.env` files for the frontend. Where they live is in 
 | `npm run test:e2e` | End-to-end tests (Playwright) against the production build |
 | `npm run check:bundle` | Fails on source maps, secrets, or initial JavaScript over budget |
 | `npm run audit` | Dependency audit, failing on high or critical issues |
+| `npm run db:start` / `db:stop` | Start or stop the local Supabase stack (needs Docker) |
+| `npm run db:reset` | Rebuild the local database from migrations and sample data |
+| `npm run db:test` | Database tests (pgTAP) against the local stack |
+| `npm run db:test:pglite` | The same database tests without Docker, in PGlite (development aid; CI decides) |
+| `npm run db:lint` | Check database functions for errors |
 
 End-to-end tests on Windows: run `npm run build`, start `npm run preview:e2e` in a second terminal, then run `npm run test:e2e`. Locally they use the installed Microsoft Edge, so no browser download is needed.
 

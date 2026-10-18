@@ -8,36 +8,36 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 
 ## 2. Current State
 
-- Steps 1 (requirements), 2 (design, 15 diagrams) and 3 (repository setup) are done. Steps 1 and 2 were approved by the owner on 2026-10-18.
-- The app is a placeholder page. CI runs lint, format, typecheck, unit tests, build, bundle check, dependency audit, end-to-end tests and a PR title check on every pull request.
-- `main` is protected ([D-026](docs/DECISIONS.md#d-026-protected-main-squash-merges-conventional-commit-titles)): pull requests only, CI must pass, squash merges, admins included.
-- Deferred by the owner: hosting ([D-003](docs/DECISIONS.md#d-003-hosting-deferred)) and the Messenger bot ([D-004](docs/DECISIONS.md#d-004-messenger-bot-deferred)). Steps 7 and 10 wait for the owner's go-ahead.
-- Open questions Q4 to Q10 remain in [PRD section 8](docs/PRD.md#8-open-questions); none block step 4.
+- Steps 1 to 4 are done: requirements, design (approved by the owner), repository setup, and the database.
+- Database: four migrations in `supabase/migrations` build the schema in [BACKEND-SCHEMA.md](docs/BACKEND-SCHEMA.md), including RLS, privileges, triggers, the rate limiter, the photo bucket and scheduled jobs. `supabase/seed.sql` adds four categories and twelve sample items.
+- 94 pgTAP assertions in `supabase/tests/database` prove the access rules. CI runs them against a real local Supabase stack ("Database tests" job, a required check on `main`).
+- No Supabase account or hosted project exists yet; everything runs locally or in CI.
+- The app is still the placeholder page; step 5 builds the public catalog.
+- `main` is protected ([D-026](docs/DECISIONS.md#d-026-protected-main-squash-merges-conventional-commit-titles)).
+- Deferred by the owner: hosting ([D-003](docs/DECISIONS.md#d-003-hosting-deferred)) and the Messenger bot ([D-004](docs/DECISIONS.md#d-004-messenger-bot-deferred)).
 
 ## 3. Active Files
 
-- Tooling: `package.json`, `eslint.config.js`, `vite.config.ts`, `playwright.config.ts`, `tsconfig*.json`, `scripts/check-bundle.mjs`
-- GitHub: `.github/workflows/ci.yml`, `.github/dependabot.yml`, `.github/pull_request_template.md`
-- App: `index.html`, `src/`, `e2e/`, `public/favicon.svg`
-- Docs: `README.md`, `CHANGELOG.md`, `docs/DECISIONS.md` (D-026, D-027), `docs/TRD.md`
+- `supabase/config.toml` (hardened auth settings), `supabase/migrations/*.sql`, `supabase/seed.sql`, `supabase/tests/database/*.test.sql`
+- `scripts/db-test-pglite.mjs`, `.github/workflows/ci.yml` (new `database` job), `package.json` (`db:*` scripts)
+- Docs: `docs/BACKEND-SCHEMA.md` (sections 3, 6, 7, new 8), `docs/DECISIONS.md` (D-028, D-029), `docs/TRD.md`, `docs/SRS.md`, `README.md`, `CHANGELOG.md`
 
 ## 4. Changes Made
 
-- Created the GitHub repository; installed GitHub CLI and Node.js 24; logged in as `thatguyKire`.
-- Wrote and got approval for the step 1 and step 2 documents; owner review page for the diagrams: https://claude.ai/artifact/A9EzTULr187orGF86kEAyo (private).
-- Step 3: app skeleton, strict lint and type rules, unit and end-to-end tests, bundle checker, CI, Dependabot, branch protection, squash-merge settings, Dependabot security updates turned on.
-- Verified locally: lint rules reject `console`, `innerHTML`, `dangerouslySetInnerHTML` and accessibility mistakes; the bundle checker fails on a planted service role key, GitHub token and source map; the build contains no `console` calls; initial JavaScript is about 66 KB gzipped of the 170 KB budget.
+- Step 4 database: schema, RLS and privileges, functions and triggers, storage bucket and policies, realtime publication, `pg_cron` jobs, sample data, pgTAP tests, CI job, local Supabase config.
+- Verified locally in PGlite: all migrations apply, seed loads 12 sample items, all 94 assertions pass. Mutation check: making hidden items visible to visitors, leaving Supabase's default grants in place, or ignoring the two-factor rule each turns tests red.
+- Design changes found while building, all reflected in BACKEND-SCHEMA: `is_admin()` is callable only by signed-in users (visitor policies never call it); staff get a select policy on photo files (needed to replace and delete them); photo uploads must match the path pattern; the category foreign key uses `no action`; no staff account in seed data (D-028); GraphQL API not exposed.
 
 ## 5. Failed Attempts
 
-- `gh` and `node` were "not recognized" in terminals opened before they were installed. Fix: restart the terminal (fully quit VS Code), or use `C:\Program Files\GitHub CLI\gh.exe` and `C:\Program Files\nodejs`.
-- `winget` was not on PATH in the automation shell. Calling `%LOCALAPPDATA%\Microsoft\WindowsApps\winget.exe` directly worked.
-- First drafts of diagrams 6, 7, 8 and 11 rendered 2,000 to 3,000 pixels wide. Fixed by changing layout directions and trimming; the ER diagram stays wide because Mermaid puts unconnected tables in one row.
-- `eslint-plugin-jsx-a11y` does not support ESLint 10 and is unmaintained; replaced by its fork ([D-027](docs/DECISIONS.md#d-027-accessibility-lint-rules-from-the-maintained-fork)).
-- On Windows, Playwright takes about two minutes to stop a preview server it started itself (the tests finish in seconds). Starting Vite directly instead of through npm did not help. Workaround: run `npm run preview:e2e` in another terminal first. CI runs on Linux and is not affected.
+- `gh` and `node` were "not recognized" in terminals opened before they were installed. Fix: restart the terminal (fully quit VS Code), or use full paths.
+- On Windows, Playwright takes about two minutes to stop a preview server it started itself. Workaround: `npm run preview:e2e` in another terminal first. CI is not affected.
+- `ON DELETE RESTRICT` reports error code 23001 in Postgres 18 (PGlite) but 23503 in Postgres 17 (Supabase). Switched to `NO ACTION`, which reports 23503 everywhere.
+- A test using `check_rate_limit(...) between 1 and 60` called the limiter twice, because Postgres expands `BETWEEN` into two comparisons. Fixed with a materialized CTE.
+- Pushing workflow files needs the `workflow` scope on the GitHub CLI login; granted on 2026-10-18.
 
 ## 6. Next Steps
 
-1. Step 4, database: Supabase CLI, migrations for the schema in [BACKEND-SCHEMA.md](docs/BACKEND-SCHEMA.md), RLS policies, pgTAP tests proving RLS works, seed data with sample products.
-2. Local database tests need Docker Desktop. Without it, they run in CI only (GitHub's Linux runners have Docker).
-3. A Supabase account and the staging and production projects are needed before anything is deployed. The owner creates the account; that can wait until after step 4.
+1. Step 5, public catalog: layout, store facts config, menu with live availability, search, three languages. Needs `@supabase/supabase-js`, i18next and React Router.
+2. To run the site against real data locally, either install Docker Desktop (local Supabase stack) or create a free Supabase account with a staging project. The owner creates the account; until then, step 5 can be built and tested against mocked data.
+3. Step 6 adds the local-only staff account script (D-028).
