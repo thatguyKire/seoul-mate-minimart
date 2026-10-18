@@ -1,0 +1,86 @@
+{
+  "skipToContent": "Skip to content",
+  "header": {
+    "navLabel": "Main",
+    "menu": "Menu",
+    "howToOrder": "How to order",
+    "visit": "Visit us",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "mobileMenuTitle": "Site menu"
+  },
+  "language": {
+    "current": "Language: {{name}}",
+    "heading": "Language"
+  },
+  "hero": {
+    "title": "Korean snacks, noodles and skincare in Masbate City",
+    "lead": "See what's in stock right now. Order on Messenger, then pick up and pay at the store.",
+    "order": "Order on Messenger",
+    "seeMenu": "See the menu"
+  },
+  "menu": {
+    "title": "Menu",
+    "lastUpdated": "Stock last updated:",
+    "filterLabel": "Categories",
+    "all": "All",
+    "searchLabel": "Search the menu",
+    "searchPlaceholder": "Try ramyun, chips or sheet mask",
+    "results_one": "{{count}} item found",
+    "results_other": "{{count}} items found",
+    "noResults": "Nothing on the menu matches “{{query}}”.",
+    "noResultsHelp": "We may still have it. Ask us on Messenger.",
+    "askOnMessenger": "Ask on Messenger",
+    "searchAllCategories": "Search all categories",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "sample": "Sample",
+    "sampleNotice": "Sample items: this menu shows test products, not the store's real range.",
+    "photoComingSoon": "Photo coming soon",
+    "emptyCategory": "Nothing in this category right now.",
+    "empty": "The menu is empty right now.",
+    "loading": "Loading the menu",
+    "errorTitle": "We couldn't load the menu right now.",
+    "errorHelp": "To ask what's in stock, message us on Messenger or call {{phone}}.",
+    "retry": "Try again",
+    "paused": "Live updates paused. Retrying."
+  },
+  "howToOrder": {
+    "title": "How to order",
+    "step1Title": "Message us",
+    "step1": "Tell us on Messenger what you'd like. We reply during store hours.",
+    "step2Title": "Pick it up",
+    "step2": "Collect your order at the store on Quezon St.",
+    "step3Title": "Pay at the store",
+    "step3": "Pay with cash or GCash when you pick up.",
+    "noDelivery": "We don't deliver yet. All orders are for pickup."
+  },
+  "visit": {
+    "title": "Visit us",
+    "hoursTitle": "Opening hours",
+    "hoursNote": "Philippine time",
+    "day": "Day",
+    "hours": "Hours",
+    "range": "{{opens}} to {{closes}}",
+    "nextDay": "{{time}} (next day)",
+    "addressTitle": "Address",
+    "phoneTitle": "Phone",
+    "copyAddress": "Copy address",
+    "copyPhone": "Copy phone number",
+    "copied": "Copied",
+    "copyFallback": "Text selected. Use your device's copy option."
+  },
+  "contact": {
+    "floating": "Message us",
+    "floatingLabel": "Message us on Messenger"
+  },
+  "footer": {
+    "tagline": "Your one stop shop for Korean goodies and daily needs.",
+    "facebook": "Seoul-Mate Minimart on Facebook"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "This page doesn't exist. The menu is on the home page.",
+    "home": "Go to the menu"
+  }
+}

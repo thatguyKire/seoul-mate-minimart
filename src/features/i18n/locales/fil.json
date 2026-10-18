@@ -1,0 +1,86 @@
+{
+  "skipToContent": "Lumaktaw sa nilalaman",
+  "header": {
+    "navLabel": "Pangunahin",
+    "menu": "Menu",
+    "howToOrder": "Paano umorder",
+    "visit": "Bisitahin kami",
+    "openMenu": "Buksan ang menu",
+    "closeMenu": "Isara ang menu",
+    "mobileMenuTitle": "Menu ng site"
+  },
+  "language": {
+    "current": "Wika: {{name}}",
+    "heading": "Wika"
+  },
+  "hero": {
+    "title": "Korean snacks, noodles at skincare sa Masbate City",
+    "lead": "Tingnan kung ano ang may stock ngayon. Umorder sa Messenger, saka kunin at bayaran sa tindahan.",
+    "order": "Umorder sa Messenger",
+    "seeMenu": "Tingnan ang menu"
+  },
+  "menu": {
+    "title": "Menu",
+    "lastUpdated": "Huling update ng stock:",
+    "filterLabel": "Mga kategorya",
+    "all": "Lahat",
+    "searchLabel": "Hanapin sa menu",
+    "searchPlaceholder": "Hal. ramyun, chips o sheet mask",
+    "results_one": "{{count}} item ang nahanap",
+    "results_other": "{{count}} item ang nahanap",
+    "noResults": "Walang tugma sa “{{query}}” sa menu.",
+    "noResultsHelp": "Baka meron pa kami. Magtanong sa Messenger.",
+    "askOnMessenger": "Magtanong sa Messenger",
+    "searchAllCategories": "Hanapin sa lahat ng kategorya",
+    "inStock": "May stock",
+    "outOfStock": "Ubos na",
+    "sample": "Sample",
+    "sampleNotice": "Mga sample na item: pang-test lang ang mga produktong ito, hindi pa ang tunay na paninda ng tindahan.",
+    "photoComingSoon": "Wala pang litrato",
+    "emptyCategory": "Wala pang item sa kategoryang ito ngayon.",
+    "empty": "Wala pang laman ang menu ngayon.",
+    "loading": "Nilo-load ang menu",
+    "errorTitle": "Hindi ma-load ang menu ngayon.",
+    "errorHelp": "Para magtanong kung ano ang may stock, mag-message sa amin sa Messenger o tumawag sa {{phone}}.",
+    "retry": "Subukan ulit",
+    "paused": "Naka-pause ang live updates. Sinusubukang kumonekta ulit."
+  },
+  "howToOrder": {
+    "title": "Paano umorder",
+    "step1Title": "Mag-message sa amin",
+    "step1": "Sabihin sa amin sa Messenger ang gusto mo. Sumasagot kami sa oras ng tindahan.",
+    "step2Title": "Kunin sa tindahan",
+    "step2": "Kunin ang order mo sa tindahan sa Quezon St.",
+    "step3Title": "Magbayad sa tindahan",
+    "step3": "Magbayad gamit ang cash o GCash pagkuha mo.",
+    "noDelivery": "Wala pa kaming delivery. Pickup lang ang lahat ng order."
+  },
+  "visit": {
+    "title": "Bisitahin kami",
+    "hoursTitle": "Oras ng tindahan",
+    "hoursNote": "Oras sa Pilipinas",
+    "day": "Araw",
+    "hours": "Oras",
+    "range": "{{opens}} hanggang {{closes}}",
+    "nextDay": "{{time}} (kinabukasan)",
+    "addressTitle": "Address",
+    "phoneTitle": "Telepono",
+    "copyAddress": "Kopyahin ang address",
+    "copyPhone": "Kopyahin ang numero",
+    "copied": "Nakopya na",
+    "copyFallback": "Naka-select na ang text. Gamitin ang copy sa device mo."
+  },
+  "contact": {
+    "floating": "Mag-message",
+    "floatingLabel": "Mag-message sa amin sa Messenger"
+  },
+  "footer": {
+    "tagline": "Ang one stop shop mo para sa Korean goodies at pang-araw-araw na pangangailangan.",
+    "facebook": "Seoul-Mate Minimart sa Facebook"
+  },
+  "notFound": {
+    "title": "Hindi nahanap ang page",
+    "body": "Walang ganitong page. Nasa home page ang menu.",
+    "home": "Pumunta sa menu"
+  }
+}

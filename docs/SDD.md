@@ -33,20 +33,24 @@ supabase/
   seed.sql      Sample data for local and staging only
 ```
 
-- `src/config/store.ts` becomes the single source of store facts once code exists; [BRIEF.md](BRIEF.md#project-inputs) then points to it.
+- `src/config/store.ts` is the single source of store facts; [BRIEF.md](BRIEF.md#project-inputs) points to it.
 - The admin feature is a separate lazy chunk, so visitors never download it (NFR-PERF-02).
+- The public site talks to Supabase through its REST and Realtime clients only, never holding a login; the admin panel uses the full supabase-js client ([D-030](DECISIONS.md#d-030-the-public-site-uses-supabases-rest-and-realtime-clients-directly)).
+- `src/lib/database.types.ts` types the tables the browser reads, in the shape `supabase gen types` produces. It is kept in step with the migrations by hand until a Supabase stack runs on the development PC.
+- The router is created in `main.tsx`, so tests render `App` inside a memory router. Tests pass a fake menu source through `MenuSourceContext`.
 - No CSS-in-JS library that injects `<style>` tags, because the CSP forbids inline styles ([section 5.5](#55-headers-and-content-security-policy)).
 
 **Frontend component tree.** The main components and what they contain.
 
 ```mermaid
 flowchart LR
-  App["App: router, i18n, theme, consent, Sentry"] --> Public["PublicLayout, under /:locale"]
+  App["App: routes, ErrorBoundary, theme, consent, Sentry"] --> Root["RootRedirect, at /"]
+  App --> Public["PublicLayout, under /:locale: SkipLink, i18n instance for the locale"]
   App --> AdminApp["AdminApp, under /admin, lazy-loaded"]
-  Public --> Header["Header: SkipLink, Nav, LanguageSwitcher, ThemeToggle, MobileMenu"]
+  Public --> Header["Header: Nav, LanguageSwitcher, ThemeToggle, MobileMenu"]
   Public --> Progress["ScrollProgress"]
   Public --> Home["HomePage"]
-  Public --> Legal["PrivacyPage, TermsPage"]
+  Public --> Legal["PrivacyPage, TermsPage, NotFoundPage"]
   Public --> Footer["Footer: legal links, Cookie settings"]
   Public --> Floating["FloatingStack: ContactButton, BackToTop"]
   Public --> Banner["CookieBanner"]
@@ -54,9 +58,9 @@ flowchart LR
   Home --> MenuSection["MenuSection"]
   MenuSection --> Search["SearchBox"]
   MenuSection --> Filter["CategoryFilter"]
-  MenuSection --> Live["LiveStatus, LastUpdated"]
+  MenuSection --> Live["LiveStatus, LastUpdated, MenuError"]
   MenuSection --> Grid["ItemGrid"]
-  Grid --> Card["ItemCard or SkeletonCard"]
+  Grid --> Card["ItemCard with ItemPhoto, or SkeletonCard"]
   Home --> HowTo["HowToOrder"]
   Home --> Info["StoreInfo: Hours, Address, Phone, CopyButton"]
   Home --> Faq["FaqAccordion"]
@@ -75,10 +79,10 @@ flowchart LR
 
 | Module | Design | SRS |
 |---|---|---|
-| catalog | Loads categories and published items through the Database API. Subscribes to `menu_state` changes and reloads the menu 300 ms after the last change event. If Realtime fails, checks `menu_state` every 10 seconds instead and shows a "live updates paused" notice ([D-020](DECISIONS.md#d-020-live-updates-through-a-one-row-version-table)). "Last updated" is the latest `availability_changed_at` among published items. Shows a "Sample" label on sample items outside production | FR-01 to FR-11, NFR-REL-01 |
-| search | Builds an in-memory index from the loaded menu: for each item, the current language's and English name, description and category name, normalized (Unicode NFKC, lowercase, collapsed spaces). Matches by substring on each keystroke. Input is only ever compared as text ([D-017](DECISIONS.md#d-017-search-runs-in-the-browser)) | FR-12 to FR-15, NFR-PERF-05 |
-| i18n | Routes under `/:locale`. The root route picks a language from saved choice, then `navigator.languages`, then English. Saves the choice, sets `<html lang>`, formats prices and times with `Intl` ([TRD 5](TRD.md#5-localization)). Fallback text gets its own `lang` attribute | FR-16 to FR-21, NFR-ACC-05 |
-| store-info | Reads store facts from `config/store.ts`. Hours are stored per day as opening and closing times; a closing time earlier than the opening time means the next day. Copy buttons use the Clipboard API, falling back to selecting the text with a "press and hold to copy" hint where the API is blocked. Announces "Copied" through a live region | FR-22 to FR-26 |
+| catalog | Loads `menu_state.version`, categories and published items through the Database API, the version request first. Subscribes to `menu_state` changes and reloads the menu 300 ms after the last change event. Each time the subscription starts, and when the tab becomes visible again, it compares the version and reloads if it changed, which catches changes made before or between subscriptions. If Realtime fails, checks the version every 10 seconds instead and shows a "live updates paused" notice ([D-020](DECISIONS.md#d-020-live-updates-through-a-one-row-version-table)). A failed reload keeps the last menu on screen; a failed first load shows the error state, retried by the visitor or by the next check. Requests time out after 15 seconds. "Last updated" is the latest `availability_changed_at` among published items. Category filter is a `?category=<slug>` query, so filtered links can be shared. Photos load as WebP, then JPEG, then the placeholder if neither exists. Shows a "Sample" label and notice on sample items outside production. The logic lives in `liveMenu.ts`, free of React, so it is unit-tested with fake timers | FR-01 to FR-11, NFR-REL-01 |
+| search | Builds an in-memory index from the loaded menu: for each item, the current language's and English name, description and category name, normalized (Unicode NFKC, lowercase, collapsed spaces). Every word of the query must appear, in any order. Runs within the selected category, on each keystroke through React's deferred value. Input is only ever compared as text ([D-017](DECISIONS.md#d-017-search-runs-in-the-browser)) | FR-12 to FR-15, NFR-PERF-05 |
+| i18n | Routes under `/:locale`; any other first segment goes back to the root. The root route picks a language from the saved choice, then `navigator.languages` (`tl` counts as Filipino), then English, keeping the query string. Only an explicit choice in the language menu is saved, so opening someone's shared link in another language does not change the visitor's default. One i18next instance per language, chosen by the route, so a switch re-renders the page in one step without a reload. Sets `<html lang>` before paint, formats prices and times with `Intl` ([TRD 5](TRD.md#5-localization)). Fallback text gets its own `lang` attribute. Translation keys are type-checked, and a unit test keeps the three languages' keys identical | FR-16 to FR-21, NFR-ACC-05 |
+| store-info | Reads store facts from `config/store.ts`. Hours are stored per day as opening and closing times; a closing time at or before the opening time means the next day. Copy buttons use the Clipboard API, falling back to selecting the text with a hint to copy it where the API is blocked. Announces "Copied" through a live region. "How to order" is a three-step list with a Messenger button | FR-22 to FR-26 |
 | contact | Floating button and all contact links use the Messenger link from store facts. The contact form validates with the shared schema for instant feedback, then posts to the `contact` function, which validates again ([section 3.2](#32-contact-function)) | FR-27 to FR-31, NFR-SEC-17 |
 | faq | Questions and answers are per-language content files. A build step fails a production build while any entry is marked TODO | FR-33 |
 | consent | Cookie banner, stored choice, footer "Cookie settings". Loads the analytics script only after Accept, and never under `/admin`. Captures UTM values as described in [section 7.3](#73-cookie-consent-analytics-and-utm) | FR-54 to FR-57, NFR-PRIV-04 |
@@ -123,7 +127,7 @@ All Supabase endpoints are under `https://<project>.supabase.co`. "Anon key" mea
 |---|---|---|---|---|---|---|
 | E1 | `GET /rest/v1/categories` | Anon key | Supabase platform | Query: selected columns, `order=sort_order` | `200`, list | `5xx` shows FR-11 state |
 | E2 | `GET /rest/v1/items` | Anon key; RLS returns published only | Supabase platform | Query: public columns only, `order=sort_order` | `200`, list | `5xx` shows FR-11 state |
-| E3 | `GET /rest/v1/menu_state` | Anon key | Used every 10 s only as the Realtime fallback | Query: `version` | `200` | Ignored, retried next interval |
+| E3 | `GET /rest/v1/menu_state` | Anon key | With each menu load, when the subscription starts, when the tab is shown again, and every 10 s as the Realtime fallback | Query: `version` | `200` | Ignored, retried at the next check |
 | E4 | Realtime: changes to `public.menu_state` | Anon key | Supabase plan connection cap | Subscribe to `UPDATE` | Event with new `version` | Channel error starts E3 polling |
 | E5 | `POST /functions/v1/contact` | Anon key; `Origin` must be the site | 5 per IP per 10 minutes | JSON, up to 8 KB ([3.2](#32-contact-function)) | `200 {"ok": true}` | `400`, `403`, `413`, `415`, `429` with `Retry-After`, `500` |
 | E6 | `POST /auth/v1/token?grant_type=password` | Anon key | Supabase Auth per IP ([D-024](DECISIONS.md#d-024-admin-login-uses-supabase-auths-rate-limits)) | Email, password | `200`, session | `400` shows the generic message; `429` "Too many attempts" |

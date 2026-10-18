@@ -15,7 +15,7 @@ Website for **Seoul-Mate Minimart**, *your one stop shop* for Korean goodies and
 
 ## Project status
 
-Steps 1 (requirements), 2 (design), 3 (repository setup) and 4 (database) of 11 are done. The site is a placeholder page until step 5 builds the menu. Progress and next steps are in [HANDOFF.md](HANDOFF.md).
+Steps 1 to 5 of 11 are done: requirements, design, repository setup, database, and the public menu (live availability, search, English, Filipino and Korean, store information). The menu shows sample products until the real list arrives. Progress and next steps are in [HANDOFF.md](HANDOFF.md).
 
 ## Local setup
 
@@ -46,6 +46,7 @@ Server secrets never go in `.env` files for the frontend. Where they live is in 
 |---|---|
 | `npm run dev` | Dev server with hot reload |
 | `npm run build` | Typecheck, then production build into `dist/` |
+| `npm run build:e2e` | The same build, pointed at the local Supabase address, for end-to-end tests |
 | `npm run preview` | Serve the production build locally |
 | `npm run lint` | ESLint, failing on any warning |
 | `npm run format` / `format:check` | Format with Prettier / check formatting |
@@ -60,7 +61,9 @@ Server secrets never go in `.env` files for the frontend. Where they live is in 
 | `npm run db:test:pglite` | The same database tests without Docker, in PGlite (development aid; CI decides) |
 | `npm run db:lint` | Check database functions for errors |
 
-End-to-end tests on Windows: run `npm run build`, start `npm run preview:e2e` in a second terminal, then run `npm run test:e2e`. Locally they use the installed Microsoft Edge, so no browser download is needed.
+End-to-end tests on Windows: run `npm run build:e2e`, start `npm run preview:e2e` in a second terminal, then run `npm run test:e2e`. Locally they use the installed Microsoft Edge, so no browser download is needed. The tests answer Supabase requests themselves, so they need no Docker; `e2e/live-stack.spec.ts`, which needs a real local stack, runs in CI only ([D-031](docs/DECISIONS.md#d-031-end-to-end-tests-use-a-fake-supabase-plus-one-live-stack-test-in-ci)).
+
+To see the site with data in `npm run dev`, put a Supabase project URL and anon key in `.env.local`: a local stack (`npm run db:start`, needs Docker) or a staging project. Without them the menu shows its error state.
 
 ## Contributing
 

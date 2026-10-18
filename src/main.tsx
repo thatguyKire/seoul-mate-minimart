@@ -1,7 +1,16 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router';
+// Self-hosted fonts (D-013). Noto Sans KR loads only the character ranges a page uses.
+import '@fontsource-variable/fredoka';
+import '@fontsource-variable/nunito';
+import '@fontsource-variable/noto-sans-kr';
 import { App } from './App';
 import './index.css';
+import './components/layout.css';
+import './features/home/home.css';
+import './features/catalog/catalog.css';
+import './features/store-info/store-info.css';
 
 const root = document.getElementById('root');
 if (!root) {
@@ -10,6 +19,8 @@ if (!root) {
 
 createRoot(root).render(
   <StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </StrictMode>,
 );

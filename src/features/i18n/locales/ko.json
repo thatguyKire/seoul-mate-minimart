@@ -1,0 +1,85 @@
+{
+  "skipToContent": "본문으로 건너뛰기",
+  "header": {
+    "navLabel": "사이트 메뉴",
+    "menu": "메뉴",
+    "howToOrder": "주문 방법",
+    "visit": "매장 안내",
+    "openMenu": "메뉴 열기",
+    "closeMenu": "메뉴 닫기",
+    "mobileMenuTitle": "사이트 메뉴"
+  },
+  "language": {
+    "current": "언어: {{name}}",
+    "heading": "언어"
+  },
+  "hero": {
+    "title": "마스바테 시티의 한국 과자, 라면, 스킨케어",
+    "lead": "지금 재고가 있는 상품을 확인하세요. 메신저로 주문하고, 매장에서 받으면서 결제하시면 됩니다.",
+    "order": "메신저로 주문하기",
+    "seeMenu": "메뉴 보기"
+  },
+  "menu": {
+    "title": "메뉴",
+    "lastUpdated": "재고 업데이트:",
+    "filterLabel": "카테고리",
+    "all": "전체",
+    "searchLabel": "메뉴 검색",
+    "searchPlaceholder": "예: 라면, 과자, 마스크팩",
+    "results_other": "상품 {{count}}개",
+    "noResults": "“{{query}}”에 맞는 상품이 없습니다.",
+    "noResultsHelp": "매장에 있을 수도 있어요. 메신저로 문의해 주세요.",
+    "askOnMessenger": "메신저로 문의하기",
+    "searchAllCategories": "전체 카테고리에서 검색",
+    "inStock": "재고 있음",
+    "outOfStock": "품절",
+    "sample": "샘플",
+    "sampleNotice": "샘플 상품: 테스트용 상품이며 실제 판매 상품이 아닙니다.",
+    "photoComingSoon": "사진 준비 중",
+    "emptyCategory": "지금은 이 카테고리에 상품이 없습니다.",
+    "empty": "지금은 메뉴에 상품이 없습니다.",
+    "loading": "메뉴를 불러오는 중",
+    "errorTitle": "지금은 메뉴를 불러올 수 없습니다.",
+    "errorHelp": "재고 문의는 메신저나 전화({{phone}})로 해 주세요.",
+    "retry": "다시 시도",
+    "paused": "실시간 업데이트가 일시 중지되었습니다. 다시 연결하는 중입니다."
+  },
+  "howToOrder": {
+    "title": "주문 방법",
+    "step1Title": "메신저로 연락",
+    "step1": "원하시는 상품을 메신저로 알려 주세요. 영업시간에 답변드립니다.",
+    "step2Title": "매장에서 수령",
+    "step2": "Quezon St. 매장에서 주문하신 상품을 받아 가세요.",
+    "step3Title": "매장에서 결제",
+    "step3": "받으실 때 현금이나 GCash로 결제하시면 됩니다.",
+    "noDelivery": "아직 배달은 하지 않습니다. 모든 주문은 매장 수령입니다."
+  },
+  "visit": {
+    "title": "매장 안내",
+    "hoursTitle": "영업시간",
+    "hoursNote": "필리핀 시간",
+    "day": "요일",
+    "hours": "시간",
+    "range": "{{opens}} ~ {{closes}}",
+    "nextDay": "{{time}} (다음 날)",
+    "addressTitle": "주소",
+    "phoneTitle": "전화",
+    "copyAddress": "주소 복사",
+    "copyPhone": "전화번호 복사",
+    "copied": "복사됨",
+    "copyFallback": "텍스트가 선택되었습니다. 기기의 복사 기능을 사용하세요."
+  },
+  "contact": {
+    "floating": "메시지 보내기",
+    "floatingLabel": "메신저로 메시지 보내기"
+  },
+  "footer": {
+    "tagline": "한국 간식과 생활용품을 한곳에서 만나는 원스톱 숍.",
+    "facebook": "페이스북의 Seoul-Mate Minimart"
+  },
+  "notFound": {
+    "title": "페이지를 찾을 수 없습니다",
+    "body": "없는 페이지입니다. 메뉴는 홈 페이지에 있습니다.",
+    "home": "메뉴로 가기"
+  }
+}
