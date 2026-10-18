@@ -85,7 +85,29 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run build
+      # A throwaway local stack with the seed data, so e2e/live-stack.spec.ts can prove RLS and
+      # live updates for real. The other tests answer Supabase requests themselves.
+      - name: Start local Supabase
+        run: npx supabase start -x studio,imgproxy,mailpit,logflare,vector,edge-runtime,supavisor,postgres-meta
+      - name: Pass the local stack's settings to the build and tests
+        run: |
+          npx supabase status -o env > "$RUNNER_TEMP/supabase.env"
+          value() { sed -n "s/^$1=\"\{0,1\}\([^\"]*\)\"\{0,1\}$/\1/p" "$RUNNER_TEMP/supabase.env"; }
+          api_url="$(value API_URL)"
+          anon_key="$(value ANON_KEY)"
+          service_key="$(value SERVICE_ROLE_KEY)"
+          if [ -z "$api_url" ] || [ -z "$anon_key" ] || [ -z "$service_key" ]; then
+            echo "::error::supabase status did not print API_URL, ANON_KEY and SERVICE_ROLE_KEY"
+            exit 1
+          fi
+          echo "::add-mask::$service_key"
+          {
+            echo "VITE_SUPABASE_URL=$api_url"
+            echo "VITE_SUPABASE_ANON_KEY=$anon_key"
+            echo "E2E_SERVICE_ROLE_KEY=$service_key"
+            echo "E2E_LIVE_SUPABASE=1"
+          } >> "$GITHUB_ENV"
+      - run: npm run build:e2e
       - run: npm run test:e2e
       - name: Upload test report
         if: failure()

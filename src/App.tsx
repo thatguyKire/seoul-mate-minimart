@@ -1,16 +1,21 @@
-// Placeholder page until the public catalog is built in step 5.
+import { Route, Routes } from 'react-router';
+import { ErrorBoundary } from './app/ErrorBoundary';
+import { LocaleRoute } from './app/LocaleRoute';
+import { RootRedirect } from './app/RootRedirect';
+import { HomePage } from './features/home/HomePage';
+import { NotFoundPage } from './features/home/NotFoundPage';
+
+/** Routes. The router itself is set up in main.tsx, so tests can use a memory router. */
 export function App() {
   return (
-    <main className="placeholder">
-      <h1>Seoul-Mate Minimart</h1>
-      <p>
-        Korean snacks and drinks, beauty and skincare, instant noodles and household essentials in
-        Masbate City.
-      </p>
-      <p>
-        Our menu website is being built. To order, message us on{' '}
-        <a href="https://m.me/61594474910928">Messenger</a>.
-      </p>
-    </main>
+    <ErrorBoundary>
+      <Routes>
+        <Route index element={<RootRedirect />} />
+        <Route path=":locale" element={<LocaleRoute />}>
+          <Route index element={<HomePage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+    </ErrorBoundary>
   );
 }

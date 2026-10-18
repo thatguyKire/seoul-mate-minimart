@@ -238,3 +238,20 @@ Each entry records one decision: date, context, the choice, and the alternatives
 - **Context:** The real database tests need Docker for the local Supabase stack, and the development PC has no Docker. Pushing untested SQL and waiting for CI on every mistake is slow.
 - **Decision:** CI runs the pgTAP tests against a real local Supabase stack on every pull request; that result decides. During development, the same migrations, seed and test files can also run in PGlite (Postgres compiled to WebAssembly, with pgTAP) on top of a small imitation of Supabase's roles and schemas. The harness is `scripts/db-test-pglite.mjs` (`npm run db:test:pglite`), a development aid only. It found three real test bugs before the first push.
 - **Alternatives considered:** Installing Docker Desktop (still possible later; it needs WSL 2 and administrator rights). Testing only in CI (rejected as the only option: slow feedback).
+
+## D-030: The public site uses Supabase's REST and Realtime clients directly
+
+- **Date:** 2026-10-18
+- **Status:** Accepted
+- **Context:** The public site may load 170 KB of gzipped JavaScript (NFR-PERF-02). With the full `@supabase/supabase-js` client, the first build of the catalog loaded 157 KB, because that client always bundles login, storage and functions code. Sentry, added in step 10, needs roughly another 25 to 30 KB. Visitors never log in or upload anything (D-001).
+- **Decision:** The public site creates `@supabase/postgrest-js` and `@supabase/realtime-js` clients itself (`src/lib/supabase.ts`), sending the same headers supabase-js sends without a session. Initial JavaScript dropped to 126 KB. The admin panel (step 6) uses the full supabase-js client, loaded only under `/admin`. Both packages are the ones supabase-js itself is built from, at the same version.
+- **Alternatives considered:** The full client everywhere (rejected: leaves no room for Sentry within the budget). Raising the budget (rejected: phones on 4G are the main audience, NFR-PERF-01).
+- **Consequence:** When Supabase changes how its client authenticates, `src/lib/supabase.ts` must follow. Dependabot updates the two packages together with supabase-js.
+
+## D-031: End-to-end tests use a fake Supabase, plus one live-stack test in CI
+
+- **Date:** 2026-10-18
+- **Status:** Accepted
+- **Context:** The end-to-end tests must cover live updates, a dropped live connection and a failing menu (FR-06, FR-09, FR-11). A real Supabase stack cannot easily stage a dropped connection, and the development PC has no Docker (D-029). The fake alone, though, cannot prove that Row Level Security and Realtime work together in the browser.
+- **Decision:** `e2e/support/fakeSupabase.ts` answers the public site's database API requests and speaks Realtime's websocket protocol, so most end-to-end tests are fast, run anywhere, and can drop the connection on demand. `e2e/live-stack.spec.ts` runs only in CI, against a local Supabase stack with the seed data: it checks that hidden items never reach the browser and that a change made in the database reaches an open page within 5 seconds. CI builds the site for these tests with `npm run build:e2e`, which points it at the local stack.
+- **Alternatives considered:** Only the real stack (rejected: no local runs without Docker, and dropped connections are hard to stage). Only the fake (rejected: would not catch a broken policy, grant or Realtime publication).

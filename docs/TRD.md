@@ -20,10 +20,10 @@ Latest stable versions on 2026-10-18. The lockfile pins exact versions from step
 | Routing | React Router | 8.x | Language URL prefixes (FR-18) |
 | Translation | i18next, react-i18next | 26.x, 17.x | Interface text in JSON files per locale |
 | Input validation | Zod | 4.x | Same schemas in the browser and in server functions (NFR-SEC-09) |
-| Backend | Supabase: Postgres, Auth, Realtime, Storage, Edge Functions | supabase-js 2.x, CLI 2.x | Edge Functions run on Deno, managed by Supabase |
+| Backend | Supabase: Postgres, Auth, Realtime, Storage, Edge Functions | postgrest-js and realtime-js 2.x (public site), supabase-js 2.x (admin panel), CLI 2.x | The public site uses the REST and Realtime clients only ([D-030](DECISIONS.md#d-030-the-public-site-uses-supabases-rest-and-realtime-clients-directly)). Edge Functions run on Deno, managed by Supabase |
 | Error tracking | Sentry | @sentry/react 11.x | |
-| Unit tests | Vitest, Testing Library, jsdom | 5.x, 16.x, 30.x | Component tests run in jsdom |
-| End-to-end tests | Playwright | 1.64.x | Includes axe accessibility checks (NFR-ACC-01) |
+| Unit tests | Vitest, Testing Library (React, user-event), jsdom | 5.x, 16.x and 14.x, 30.x | Component tests run in jsdom |
+| End-to-end tests | Playwright, @axe-core/playwright | 1.64.x, 4.x | axe accessibility checks (NFR-ACC-01). Supabase is faked except in one CI-only test ([D-031](DECISIONS.md#d-031-end-to-end-tests-use-a-fake-supabase-plus-one-live-stack-test-in-ci)) |
 | Database | Postgres through the Supabase CLI | CLI 2.121.x, Postgres 17 locally | Migrations in `supabase/migrations`, config in `supabase/config.toml` |
 | Database tests | pgTAP through `supabase test db`; PGlite with pgTAP locally | PGlite 0.5.x | RLS proofs (NFR-SEC-01 to NFR-SEC-03); PGlite only when Docker is missing ([D-029](DECISIONS.md#d-029-local-database-tests-in-pglite-ci-as-the-source-of-truth)) |
 | Lint and format | ESLint, typescript-eslint (strict, type-checked), Prettier | 10.x, 8.x, 3.x | Also bans `console` and raw HTML (NFR-SEC-10) |
@@ -101,6 +101,6 @@ Constraints that follow:
 
 ## 6. Other constraints
 
-- Store facts have one source: [BRIEF.md, Project inputs](BRIEF.md#project-inputs). The code reads them from one config file (designed in `SDD.md`, step 2).
+- Store facts come from [BRIEF.md, Project inputs](BRIEF.md#project-inputs). The code reads them from one file, `src/config/store.ts` ([SDD 2.1](SDD.md#21-frontend-structure)).
 - Running costs: no budget is set yet ([PRD Q6](PRD.md#8-open-questions)). Free plans are preferred where they meet the requirements.
 - Development PC: Windows 11 with Git, GitHub CLI and Node.js 24. Docker Desktop is not installed yet. Local end-to-end tests use the installed Microsoft Edge; CI uses Playwright's Chromium.

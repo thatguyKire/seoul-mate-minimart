@@ -16,6 +16,8 @@ Before writing any code, read this whole prompt, list every blank placeholder an
 
 ## Project inputs
 
+> Since step 5, the site reads the store facts below (address, phone, hours, links) from [`src/config/store.ts`](../src/config/store.ts). To change a fact, change it there and here.
+
 | Input | Value |
 |---|---|
 | Store name | Seoul-Mate Minimart |

@@ -8,36 +8,40 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 
 ## 2. Current State
 
-- Steps 1 to 4 are done: requirements, design (approved by the owner), repository setup, and the database.
-- Database: four migrations in `supabase/migrations` build the schema in [BACKEND-SCHEMA.md](docs/BACKEND-SCHEMA.md), including RLS, privileges, triggers, the rate limiter, the photo bucket and scheduled jobs. `supabase/seed.sql` adds four categories and twelve sample items.
-- 94 pgTAP assertions in `supabase/tests/database` prove the access rules. CI runs them against a real local Supabase stack ("Database tests" job, a required check on `main`).
-- No Supabase account or hosted project exists yet; everything runs locally or in CI.
-- The app is still the placeholder page; step 5 builds the public catalog.
+- Steps 1 to 5 are done: requirements, design (approved by the owner), repository setup, database, and the public catalog.
+- The public site works against any Supabase project: menu by category with live availability, search, category filter, English, Filipino and Korean under `/en/`, `/fil/`, `/ko/`, store information, how to order, mobile menu, floating Messenger button. Light and dark themes follow the system setting; the toggle comes in step 8.
+- No Supabase account or hosted project exists yet, and Docker is not installed, so the site has not been seen with live data on the development PC. End-to-end tests use a fake Supabase locally; CI also runs `e2e/live-stack.spec.ts` against a real local stack ([D-031](docs/DECISIONS.md#d-031-end-to-end-tests-use-a-fake-supabase-plus-one-live-stack-test-in-ci)).
+- Initial JavaScript is 126 KB gzipped of the 170 KB budget ([D-030](docs/DECISIONS.md#d-030-the-public-site-uses-supabases-rest-and-realtime-clients-directly)).
 - `main` is protected ([D-026](docs/DECISIONS.md#d-026-protected-main-squash-merges-conventional-commit-titles)).
 - Deferred by the owner: hosting ([D-003](docs/DECISIONS.md#d-003-hosting-deferred)) and the Messenger bot ([D-004](docs/DECISIONS.md#d-004-messenger-bot-deferred)).
 
 ## 3. Active Files
 
-- `supabase/config.toml` (hardened auth settings), `supabase/migrations/*.sql`, `supabase/seed.sql`, `supabase/tests/database/*.test.sql`
-- `scripts/db-test-pglite.mjs`, `.github/workflows/ci.yml` (new `database` job), `package.json` (`db:*` scripts)
-- Docs: `docs/BACKEND-SCHEMA.md` (sections 3, 6, 7, new 8), `docs/DECISIONS.md` (D-028, D-029), `docs/TRD.md`, `docs/SRS.md`, `README.md`, `CHANGELOG.md`
+- App shell: `src/main.tsx`, `src/App.tsx`, `src/app/` (locale route and layout, root redirect, error boundary)
+- Catalog: `src/features/catalog/` (`liveMenu.ts` holds the live-update logic, `supabaseMenuSource.ts` the Supabase calls, `MenuSection.tsx` the UI)
+- Search, languages, store information: `src/features/search/`, `src/features/i18n/` (translations in `locales/*.json`), `src/features/store-info/`, `src/config/store.ts`
+- Shared: `src/components/`, `src/lib/` (`supabase.ts`, `format.ts`, `database.types.ts`), styles in `src/index.css` and one CSS file per area
+- Tests: `src/**/*.test.ts(x)`, `src/test/`, `e2e/` (`support/fakeSupabase.ts`), `.github/workflows/ci.yml` (end-to-end job now starts a local Supabase)
+- Docs: `docs/SRS.md` (traceability 6.1), `docs/SDD.md` (2.1, 2.2, E3), `docs/DECISIONS.md` (D-030, D-031), `docs/TRD.md`, `docs/ARCHITECTURE.md` (6), `docs/BRIEF.md`, `README.md`, `CHANGELOG.md`
 
 ## 4. Changes Made
 
-- Step 4 database: schema, RLS and privileges, functions and triggers, storage bucket and policies, realtime publication, `pg_cron` jobs, sample data, pgTAP tests, CI job, local Supabase config.
-- Verified locally in PGlite: all migrations apply, seed loads 12 sample items, all 94 assertions pass. Mutation check: making hidden items visible to visitors, leaving Supabase's default grants in place, or ignoring the two-factor rule each turns tests red.
-- Design changes found while building, all reflected in BACKEND-SCHEMA: `is_admin()` is callable only by signed-in users (visitor policies never call it); staff get a select policy on photo files (needed to replace and delete them); photo uploads must match the path pattern; the category foreign key uses `no action`; no staff account in seed data (D-028); GraphQL API not exposed.
+- Step 5, public catalog, in one pull request: everything in section 2 above, 69 unit tests and 51 end-to-end tests (phone and desktop sizes), all passing locally in Edge.
+- Built store information and how to order (FR-22 to FR-26) in this step too, because the hero must say where the store is and how to order. FAQ, contact form, legal pages, cookie banner, theme toggle, back to top, scroll progress and print styles stay in step 8.
+- Visual check with screenshots in light and dark, English and Korean, phone and desktop. "Last updated" moved under the Menu heading so the floating button never covers it.
 
 ## 5. Failed Attempts
 
-- `gh` and `node` were "not recognized" in terminals opened before they were installed. Fix: restart the terminal (fully quit VS Code), or use full paths.
-- On Windows, Playwright takes about two minutes to stop a preview server it started itself. Workaround: `npm run preview:e2e` in another terminal first. CI is not affected.
-- `ON DELETE RESTRICT` reports error code 23001 in Postgres 18 (PGlite) but 23503 in Postgres 17 (Supabase). Switched to `NO ACTION`, which reports 23503 everywhere.
-- A test using `check_rate_limit(...) between 1 and 60` called the limiter twice, because Postgres expands `BETWEEN` into two comparisons. Fixed with a materialized CTE.
-- Pushing workflow files needs the `workflow` scope on the GitHub CLI login; granted on 2026-10-18.
+- The full `@supabase/supabase-js` client put initial JavaScript at 157 KB, too close to the budget once Sentry arrives. Replaced with its REST and Realtime packages (D-030).
+- Concatenated strings in a `select(...)` call lose their literal type, so the Supabase client typed every row as an error. Keep each column list as one string literal.
+- `@typescript-eslint/no-generated-empty-object-type` flags the empty `Views` and `Functions` groups in `database.types.ts`; they carry a disable comment because the client requires them.
+- Playwright's `test.skip(({}, testInfo) => ...)` is not allowed: the condition gets fixtures only. The live-stack test skips on `isMobile` instead.
+- Suspected that a quick remount would reuse a closing Realtime channel with the same name. It does not: the client drops a channel from its list as soon as it starts leaving. Kept the remount test in `catalog.spec.ts` as a guard.
+- Still true: on Windows, Playwright takes about two minutes to stop a preview server it started itself, so run `npm run preview:e2e` in another terminal first.
 
 ## 6. Next Steps
 
-1. Step 5, public catalog: layout, store facts config, menu with live availability, search, three languages. Needs `@supabase/supabase-js`, i18next and React Router.
-2. To run the site against real data locally, either install Docker Desktop (local Supabase stack) or create a free Supabase account with a staging project. The owner creates the account; until then, step 5 can be built and tested against mocked data.
-3. Step 6 adds the local-only staff account script (D-028).
+1. Merge the step 5 pull request once CI passes. The first real run of `e2e/live-stack.spec.ts` happens there: if it fails, check that `supabase status -o env` still prints `API_URL`, `ANON_KEY` and `SERVICE_ROLE_KEY`.
+2. Step 6, admin panel: login, item editing, availability switch, confirmation modals, photo upload, and the local-only staff account script (D-028). It uses the full supabase-js client, lazy-loaded under `/admin`. Decide there how visitors learn a photo's format: today the card tries WebP, then JPEG, so a JPEG-only photo costs one failed request (D-019). Storing the format with the photo, or always uploading both formats, would remove it.
+3. Owner: create a Supabase staging project (or install Docker Desktop) to see the site with real data; test the m.me link on an Android phone, an iPhone and a desktop (D-014); find fluent Filipino and Korean reviewers for the drafted text (D-008).
+4. Before the menu passes 1,000 published items, page the item reads (ARCHITECTURE 6).

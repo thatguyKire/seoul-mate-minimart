@@ -344,23 +344,59 @@ Every endpoint's method, path, auth, rate limit, schemas and error codes are in 
 
 ## 6. Traceability matrix
 
-Tests are filled in during steps 4 to 9. Each range below is split into one row per requirement as its tests are written.
+Tests are filled in during steps 4 to 9. Each range is split into one row per requirement as its tests are written. Unit tests are `src/**/*.test.ts(x)` (Vitest), end-to-end tests are `e2e/*.spec.ts` (Playwright, at phone and desktop sizes), and database tests are in `supabase/tests/database` (pgTAP).
+
+### 6.1 Verified
+
+| Requirement | SDD section | Verified by |
+|---|---|---|
+| FR-01 | [2.2](SDD.md#22-public-site-modules) catalog | `menuView.test.ts`; `catalog.spec.ts` (items by category) |
+| FR-02 | [2.2](SDD.md#22-public-site-modules) catalog | `format.test.ts` (prices); `App.test.tsx`; `catalog.spec.ts` |
+| FR-03 | [2.2](SDD.md#22-public-site-modules) catalog | `App.test.tsx`; `catalog.spec.ts` |
+| FR-04 | [2.2](SDD.md#22-public-site-modules) catalog, [4.1](SDD.md#41-item-states) | `menuView.test.ts`; `App.test.tsx`; `catalog.spec.ts` |
+| FR-05 | [2.2](SDD.md#22-public-site-modules) catalog | `menuView.test.ts`; `App.test.tsx`; `catalog.spec.ts` (filter through the address) |
+| FR-06 | [2.2](SDD.md#22-public-site-modules) catalog, [7.1](SDD.md#71-live-availability-update) | `liveMenu.test.ts`; `catalog.spec.ts` (live update without a reload); `live-stack.spec.ts` (real stack, CI) |
+| FR-07 | [2.2](SDD.md#22-public-site-modules) catalog, [5.3](SDD.md#53-database-access) | `02_visitor_access.test.sql`; `live-stack.spec.ts` (response body, CI) |
+| FR-08 | [2.2](SDD.md#22-public-site-modules) catalog | `menuView.test.ts`; `format.test.ts`; `App.test.tsx`; `catalog.spec.ts` |
+| FR-09 | [2.2](SDD.md#22-public-site-modules) catalog | `liveMenu.test.ts`; `catalog.spec.ts` (connection dropped) |
+| FR-10 | [2.2](SDD.md#22-public-site-modules) catalog | `App.test.tsx`; `catalog.spec.ts` |
+| FR-11 | [2.2](SDD.md#22-public-site-modules) catalog, [6](SDD.md#6-error-handling-and-logging) | `App.test.tsx`; `catalog.spec.ts`; `layout.spec.ts` (axe on the error state) |
+| FR-12 | [2.2](SDD.md#22-public-site-modules) search | `searchIndex.test.ts`; `App.test.tsx`; `catalog.spec.ts` |
+| FR-13 | [2.2](SDD.md#22-public-site-modules) search | `searchIndex.test.ts`; `catalog.spec.ts` |
+| FR-14 | [2.2](SDD.md#22-public-site-modules) search | `App.test.tsx`; `catalog.spec.ts` |
+| FR-15 | [2.2](SDD.md#22-public-site-modules) search | `searchIndex.test.ts`; `App.test.tsx`; `catalog.spec.ts` (injection strings: no markup, no dialogs, no requests) |
+| FR-16 | [2.2](SDD.md#22-public-site-modules) i18n | `App.test.tsx`; `languages.spec.ts` (header and mobile menu) |
+| FR-17 | [2.2](SDD.md#22-public-site-modules) i18n | `translations.test.ts` (same keys in every language); `languages.spec.ts` |
+| FR-18 | [2.2](SDD.md#22-public-site-modules) i18n | `locales.test.ts`; `languages.spec.ts` |
+| FR-19 | [2.2](SDD.md#22-public-site-modules) i18n | `App.test.tsx`; `languages.spec.ts` |
+| FR-20 | [2.2](SDD.md#22-public-site-modules) i18n | `locales.test.ts`; `App.test.tsx`; `languages.spec.ts` (Korean, Tagalog and unsupported browsers) |
+| FR-21 | [2.2](SDD.md#22-public-site-modules) i18n | `locales.test.ts`; `App.test.tsx`; `languages.spec.ts` |
+| FR-22 | [2.2](SDD.md#22-public-site-modules) store-info | `hours.test.ts`; `App.test.tsx`; `layout.spec.ts` |
+| FR-23 | [2.2](SDD.md#22-public-site-modules) store-info | `hours.test.ts`; `layout.spec.ts`; `languages.spec.ts` |
+| FR-24 | [2.2](SDD.md#22-public-site-modules) store-info | `App.test.tsx`; `layout.spec.ts` |
+| FR-25 | [2.2](SDD.md#22-public-site-modules) store-info | `CopyButton.test.tsx` (clipboard allowed and blocked); `layout.spec.ts` |
+| FR-26 | [2.2](SDD.md#22-public-site-modules) store-info | `App.test.tsx` |
+| FR-27 | [2.2](SDD.md#22-public-site-modules) contact | `App.test.tsx`; `layout.spec.ts` |
+| FR-28 | [2.2](SDD.md#22-public-site-modules) contact | `App.test.tsx`; `catalog.spec.ts`; `layout.spec.ts` |
+| FR-60 | [2.2](SDD.md#22-public-site-modules) layout | `layout.spec.ts` (anchored heading below the sticky header) |
+| FR-61 | [2.2](SDD.md#22-public-site-modules) layout | `layout.spec.ts` (focus stays inside, Escape closes); `languages.spec.ts` (link tap closes) |
+| FR-62 | [2.2](SDD.md#22-public-site-modules) layout | `layout.spec.ts` |
+
+Manual screen reader checks for FR-60 to FR-62 are still to do (step 11).
+
+### 6.2 Still to split
 
 | Requirements | Area | SDD section | Verified by (planned) |
 |---|---|---|---|
-| FR-01 to FR-11 | Catalog | [2.2](SDD.md#22-public-site-modules) catalog, [4.1](SDD.md#41-item-states), [7.1](SDD.md#71-live-availability-update) | End-to-end tests (Playwright); database test for FR-07 |
-| FR-12 to FR-15 | Search | [2.2](SDD.md#22-public-site-modules) search | Unit tests (Vitest); end-to-end tests with injection strings |
-| FR-16 to FR-21 | Languages | [2.2](SDD.md#22-public-site-modules) i18n | Unit tests; end-to-end tests in each locale |
-| FR-22 to FR-26 | Store information | [2.2](SDD.md#22-public-site-modules) store-info | Unit tests for hours formatting, including past midnight; end-to-end tests |
-| FR-27 to FR-32 | Contact | [2.2](SDD.md#22-public-site-modules) contact, [2.4](SDD.md#24-server-functions), [3.2](SDD.md#32-contact-function) | End-to-end tests; server function tests |
+| FR-29 to FR-32 | Contact form | [2.2](SDD.md#22-public-site-modules) contact, [2.4](SDD.md#24-server-functions), [3.2](SDD.md#32-contact-function) | End-to-end tests; server function tests |
 | FR-33 | FAQ | [2.2](SDD.md#22-public-site-modules) faq | End-to-end test; build check for TODO entries |
 | FR-34 to FR-47 | Admin panel | [2.3](SDD.md#23-admin-panel-modules), [5.4](SDD.md#54-staff-sessions), [7.2](SDD.md#72-admin-login-and-item-edit) | End-to-end tests; database tests (pgTAP) |
 | FR-48 to FR-53 | Messenger bot (Deferred) | [2.4](SDD.md#24-server-functions), [2.5](SDD.md#25-reply-engine-deferred), [3.3](SDD.md#33-messenger-webhook-deferred), [7.4](SDD.md#74-messenger-message-deferred), [7.5](SDD.md#75-bot-reply-logic-deferred) | Server function tests; reply engine unit tests |
 | FR-54 to FR-59 | Privacy, consent and legal | [2.2](SDD.md#22-public-site-modules) consent and legal, [7.3](SDD.md#73-cookie-consent-analytics-and-utm) | End-to-end tests asserting no analytics requests or storage before consent; legal review |
-| FR-60 to FR-69 | Layout and display | [2.2](SDD.md#22-public-site-modules) layout | End-to-end tests; manual keyboard and screen reader check |
+| FR-63 to FR-69 | Layout and display | [2.2](SDD.md#22-public-site-modules) layout | End-to-end tests (step 8). FR-65 covers only the contact button so far (`layout.spec.ts`) |
 | NFR-SEC-01 to NFR-SEC-03 | Database access | [5.3](SDD.md#53-database-access) | `supabase/tests/database` files 01 to 04 (pgTAP), run in CI ([BACKEND-SCHEMA 8](BACKEND-SCHEMA.md#8-tests)) |
 | NFR-SEC-04 to NFR-SEC-18 | Other security | [5.2](SDD.md#52-threat-model-stride) and [5.4 to 5.9](SDD.md#54-staff-sessions) | Lint rules, CI dependency audit, bundle secret scan, header checks, injection tests |
-| NFR-PERF-01 to NFR-PERF-06 | Performance | [2.1](SDD.md#21-frontend-structure); ARCHITECTURE [5](ARCHITECTURE.md#5-caching) and [6](ARCHITECTURE.md#6-scaling) | Lighthouse CI; bundle size check in CI; search benchmark |
-| NFR-ACC-01 to NFR-ACC-07 | Accessibility | [2.2](SDD.md#22-public-site-modules) layout and i18n; `UI-UX.md` (step 8) | axe checks in end-to-end tests; manual audit |
-| NFR-PRIV-01 to NFR-PRIV-05 | Privacy | [5.7](SDD.md#57-secrets), [6](SDD.md#6-error-handling-and-logging), [7.3](SDD.md#73-cookie-consent-analytics-and-utm) | End-to-end network and storage checks; Sentry scrubbing test; legal review |
-| NFR-REL-01 to NFR-REL-05 | Reliability | [6](SDD.md#6-error-handling-and-logging); ARCHITECTURE [7](ARCHITECTURE.md#7-error-tracking-and-monitoring) and [8](ARCHITECTURE.md#8-backups-and-recovery) | End-to-end offline tests; restore drill; uptime monitor |
+| NFR-PERF-01 to NFR-PERF-06 | Performance | [2.1](SDD.md#21-frontend-structure); ARCHITECTURE [5](ARCHITECTURE.md#5-caching) and [6](ARCHITECTURE.md#6-scaling) | Lighthouse CI (planned); bundle size check in CI, `check-bundle.mjs` (NFR-PERF-02); search benchmark in `searchIndex.test.ts` (NFR-PERF-05) |
+| NFR-ACC-01 to NFR-ACC-07 | Accessibility | [2.2](SDD.md#22-public-site-modules) layout and i18n; `UI-UX.md` (step 8) | axe checks in `layout.spec.ts` (English and Korean, light and dark, phone and desktop); fallback `lang` in `App.test.tsx` (NFR-ACC-05); manual audit |
+| NFR-PRIV-01 to NFR-PRIV-05 | Privacy | [5.7](SDD.md#57-secrets), [6](SDD.md#6-error-handling-and-logging), [7.3](SDD.md#73-cookie-consent-analytics-and-utm) | Hosts contacted before consent in `layout.spec.ts` (NFR-PRIV-02); storage checks (step 8); Sentry scrubbing test; legal review |
+| NFR-REL-01 to NFR-REL-05 | Reliability | [6](SDD.md#6-error-handling-and-logging); ARCHITECTURE [7](ARCHITECTURE.md#7-error-tracking-and-monitoring) and [8](ARCHITECTURE.md#8-backups-and-recovery) | Menu error state in `catalog.spec.ts` (NFR-REL-01); restore drill; uptime monitor |
