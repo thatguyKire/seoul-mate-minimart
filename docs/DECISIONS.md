@@ -206,3 +206,19 @@ Each entry records one decision: date, context, the choice, and the alternatives
 - **Context:** The public site has three languages (D-006). The admin panel is used only by a few staff members, and every translated string adds review work (D-008).
 - **Decision:** The admin panel is in English for v1, built on the same translation system so other languages can be added later. Item text is still entered in all three languages.
 - **Alternatives considered:** All three languages in the admin panel (rejected for v1: triples the review work for a handful of users). Revisit if staff prefer Filipino.
+
+## D-026: Protected main, squash merges, Conventional Commit titles
+
+- **Date:** 2026-10-18
+- **Status:** Accepted
+- **Context:** The brief requires a protected `main`, pull requests that pass CI, and Conventional Commit messages. The project has one owner, so nobody else can approve a pull request.
+- **Decision:** `main` requires a pull request and passing CI checks (lint, format, typecheck, unit tests, build, bundle check, dependency audit, end-to-end tests, PR title), with no required approvals. The rules apply to admins too, and force pushes and deletion are blocked. Pull requests are squash-merged using the PR title as the commit message, so a CI check on the title enforces Conventional Commits for every commit on `main`. Branches are deleted after merging.
+- **Alternatives considered:** Requiring one approval (rejected: a single owner cannot approve their own pull request). A commit message linter on every commit (rejected: squash merging makes the PR title the only message that reaches `main`, so checking the title is enough without another dependency).
+
+## D-027: Accessibility lint rules from the maintained fork
+
+- **Date:** 2026-10-18
+- **Status:** Accepted
+- **Context:** `eslint-plugin-jsx-a11y` is the usual accessibility linter for React, but its last release was in October 2024 and it does not support ESLint 10. That makes it unmaintained by NFR-SEC-18's definition.
+- **Decision:** Use `eslint-plugin-jsx-a11y-x`, a fork by the es-tooling project that supports ESLint 10 (latest release May 2026, about 110,000 weekly downloads), with its strict preset. axe checks in the end-to-end tests (step 5 onward) cover what static rules cannot.
+- **Alternatives considered:** The original plugin with forced peer dependencies (rejected: unmaintained). Staying on ESLint 9 (rejected: its maintenance period has ended). No accessibility linting (rejected: catches problems earlier than end-to-end tests).

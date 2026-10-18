@@ -4,6 +4,16 @@ node_modules/
 # Build output
 dist/
 build/
+*.tsbuildinfo
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+
+# Supabase local state
+supabase/.temp/
+supabase/.branches/
 
 # Environment / secrets
 .env
