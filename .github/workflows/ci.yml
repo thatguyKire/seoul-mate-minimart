@@ -51,6 +51,26 @@ jobs:
       - name: Dependency audit (fails on high or critical)
         run: npm audit --audit-level=high
 
+  database:
+    name: Database tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Start local Supabase (migrations and seed applied from scratch)
+        run: npx supabase start -x studio,imgproxy,mailpit,logflare,vector,edge-runtime,supavisor,postgres-meta
+      - name: Database tests (pgTAP)
+        run: npx supabase test db --local
+      - name: Lint database functions
+        run: npx supabase db lint --local --schema public --level warning --fail-on warning
+
   e2e:
     name: End-to-end tests
     runs-on: ubuntu-24.04
