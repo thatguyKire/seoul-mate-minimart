@@ -1,0 +1,33 @@
+/* Minimal base styles until the design tokens in docs/UI-UX.md are built (step 5 and 8). */
+:root {
+  color-scheme: light dark;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  line-height: 1.6;
+  color: #1e2b5e;
+  background: #fff7fa;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f2eef7;
+    background: #121528;
+  }
+}
+
+body {
+  margin: 0;
+}
+
+.placeholder {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+}
+
+.placeholder a {
+  color: inherit;
+}

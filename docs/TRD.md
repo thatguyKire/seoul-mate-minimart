@@ -13,7 +13,7 @@ Latest stable versions on 2026-10-18. The lockfile pins exact versions from step
 
 | Area | Choice | Version | Notes |
 |---|---|---|---|
-| Tooling runtime | Node.js LTS | 24.x | Not installed on the development PC yet; needed before step 3 |
+| Tooling runtime | Node.js LTS | 24.x | `.nvmrc`; `engines` in `package.json` requires 24 or later |
 | Language | TypeScript | 6.0.x | Not 7.x, because typescript-eslint 8.71 supports TypeScript below 6.1 only ([D-015](DECISIONS.md#d-015-typescript-60-for-now)) |
 | Build | Vite | 8.x | |
 | UI | React, React DOM | 19.x | |
@@ -22,10 +22,11 @@ Latest stable versions on 2026-10-18. The lockfile pins exact versions from step
 | Input validation | Zod | 4.x | Same schemas in the browser and in server functions (NFR-SEC-09) |
 | Backend | Supabase: Postgres, Auth, Realtime, Storage, Edge Functions | supabase-js 2.x, CLI 2.x | Edge Functions run on Deno, managed by Supabase |
 | Error tracking | Sentry | @sentry/react 11.x | |
-| Unit tests | Vitest | 5.x | |
+| Unit tests | Vitest, Testing Library, jsdom | 5.x, 16.x, 30.x | Component tests run in jsdom |
 | End-to-end tests | Playwright | 1.64.x | Includes axe accessibility checks (NFR-ACC-01) |
 | Database tests | pgTAP through `supabase test db` | | RLS proofs (NFR-SEC-01 to NFR-SEC-03) |
-| Lint and format | ESLint, typescript-eslint, Prettier | 10.x, 8.x, 3.x | |
+| Lint and format | ESLint, typescript-eslint (strict, type-checked), Prettier | 10.x, 8.x, 3.x | Also bans `console` and raw HTML (NFR-SEC-10) |
+| Lint plugins | eslint-plugin-react-hooks, eslint-plugin-react-refresh, eslint-plugin-jsx-a11y-x | 7.x, 0.5.x, 0.2.x | Accessibility rules from the maintained fork ([D-027](DECISIONS.md#d-027-accessibility-lint-rules-from-the-maintained-fork)) |
 | Fonts | Fontsource variable fonts: Fredoka, Nunito, Noto Sans KR | 5.x | Self-hosted ([D-013](DECISIONS.md#d-013-self-hosted-fonts)) |
 | CI | GitHub Actions | | Lint, typecheck, tests, dependency audit |
 | Dependency updates | Dependabot | | NFR-SEC-18 |
@@ -101,4 +102,4 @@ Constraints that follow:
 
 - Store facts have one source: [BRIEF.md, Project inputs](BRIEF.md#project-inputs). The code reads them from one config file (designed in `SDD.md`, step 2).
 - Running costs: no budget is set yet ([PRD Q6](PRD.md#8-open-questions)). Free plans are preferred where they meet the requirements.
-- Development PC: Windows 11 with Git and GitHub CLI. Node.js and Docker Desktop are not installed yet.
+- Development PC: Windows 11 with Git, GitHub CLI and Node.js 24. Docker Desktop is not installed yet. Local end-to-end tests use the installed Microsoft Edge; CI uses Playwright's Chromium.
