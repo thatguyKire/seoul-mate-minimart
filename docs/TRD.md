@@ -71,6 +71,7 @@ The host chosen under [D-003](DECISIONS.md#d-003-hosting-deferred) must:
 
 - If Docker Desktop cannot run on the development PC, database tests run in CI only, and local development uses the staging project.
 - Staging and production never share keys or data.
+- Staging exists since 2026-10-18: the Supabase project `vebcdxmhoeksxnlyrmqf` ("thatguyKire's Project"), free plan, region `ap-northeast-1` (Tokyo), with the migrations and sample data. How migrations reach it until CI deploys them is in [D-032](DECISIONS.md#d-032-staging-migrations-applied-through-the-supabase-connector-until-step-10). For production, a region closer to the Philippines, such as `ap-southeast-1` (Singapore), is worth considering; the region cannot be changed after a project is created.
 - Sample products ([D-010](DECISIONS.md#d-010-sample-products-until-the-real-list-arrives)) exist only in local and staging data.
 
 ## 4. Browser and device support

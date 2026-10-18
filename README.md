@@ -63,7 +63,7 @@ Server secrets never go in `.env` files for the frontend. Where they live is in 
 
 End-to-end tests on Windows: run `npm run build:e2e`, start `npm run preview:e2e` in a second terminal, then run `npm run test:e2e`. Locally they use the installed Microsoft Edge, so no browser download is needed. The tests answer Supabase requests themselves, so they need no Docker; `e2e/live-stack.spec.ts`, which needs a real local stack, runs in CI only ([D-031](docs/DECISIONS.md#d-031-end-to-end-tests-use-a-fake-supabase-plus-one-live-stack-test-in-ci)).
 
-To see the site with data in `npm run dev`, put a Supabase project URL and anon key in `.env.local`: a local stack (`npm run db:start`, needs Docker) or a staging project. Without them the menu shows its error state.
+To see the site with data in `npm run dev`, put a Supabase project URL and anon (publishable) key in `.env.local`: the staging project's, from its dashboard under Project Settings, API Keys, or a local stack's (`npm run db:start`, needs Docker). Set `VITE_APP_ENV=staging` for the staging project. Without them the menu shows its error state.
 
 ## Contributing
 
