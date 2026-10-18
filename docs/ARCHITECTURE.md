@@ -122,7 +122,7 @@ The expected load is one shop's customers, so the design favors simplicity, with
 - **Frontend:** static files on a CDN; no servers to scale.
 - **Database connections:** the browser and the functions both use the Database API over HTTP, which pools connections, so nothing opens direct database connections.
 - **Live updates:** each open page holds one Realtime connection. Supabase plans cap concurrent connections, and the free plan's cap is low, so check the current figure before launch. Over the cap, pages fall back to checking `menu_state` every 10 seconds ([D-020](DECISIONS.md#d-020-live-updates-through-a-one-row-version-table)).
-- **Menu reloads:** every change makes each open page reload the published menu. At a few hundred items this is a small response (estimated well under 100 KB compressed). Bulk changes cause one reload, not one per item. If the menu grows past about 2,000 items, switch to loading only changed items.
+- **Menu reloads:** every change makes each open page reload the published menu. At a few hundred items this is a small response (estimated well under 100 KB compressed). Bulk changes cause one reload, not one per item. If the menu grows past about 2,000 items, switch to loading only changed items. The Database API also returns at most 1,000 rows per request (`max_rows`), and the public site reads all published items in one request, so past 1,000 published items the reads must be paged.
 - **Indexes:** listed in [BACKEND-SCHEMA 5](BACKEND-SCHEMA.md#5-indexes).
 
 ## 7. Error tracking and monitoring

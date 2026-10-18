@@ -17,3 +17,10 @@ All notable changes to this project are recorded here. The format follows [Keep 
 - Sample menu data: four categories and twelve items, all flagged as samples.
 - Database tests: 94 pgTAP assertions covering visitor, signed-in and staff access, the two-factor rule, rate limiting and constraints, run in CI against a local Supabase stack.
 - Local Supabase settings: no public sign-up, 15-minute access tokens, stronger passwords, two-factor login, session limits.
+- Public menu: published items by category with price, photo or "Photo coming soon", and stock written out on a shelf-tag strip; category filter in the address; skeleton cards while loading; a plain error with Messenger and phone links when the menu cannot load.
+- Live availability: open pages update within seconds of a change, without a reload; while the live connection is down the page says so and checks every 10 seconds.
+- Menu search as you type, across names, descriptions and categories, in the page language and English.
+- English, Filipino and Korean, each under its own address (`/en/`, `/fil/`, `/ko/`), with a language menu, the browser's language on a first visit, and the choice remembered. Filipino and Korean text are drafts awaiting review.
+- Store information: opening hours for each day, address and phone with copy buttons, tap to call, and how to order.
+- Layout: sticky header, mobile menu, skip link, floating Messenger button, footer; light and dark themes from the system setting; self-hosted Fredoka, Nunito and Noto Sans KR.
+- End-to-end tests with a fake Supabase (live updates, dropped connection, errors, injection strings, languages, axe checks in both themes) and a CI test against a real local stack.

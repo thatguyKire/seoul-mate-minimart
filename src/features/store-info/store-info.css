@@ -1,0 +1,162 @@
+/* How to order and Visit us. */
+
+.how-to-order {
+  border-top: 1px solid var(--color-border);
+}
+
+.how-to-order h2 {
+  margin-bottom: 1.75rem;
+}
+
+/* A real sequence, so the steps are numbered. The numbers are drawn by CSS and hidden from screen readers; the list itself is ordered. */
+.steps {
+  display: grid;
+  gap: 1.5rem;
+  counter-reset: step;
+  list-style: none;
+}
+
+@media (min-width: 48rem) {
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+  }
+}
+
+.steps__item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 1rem;
+  row-gap: 0.25rem;
+  align-content: start;
+  counter-increment: step;
+}
+
+.steps__item::before {
+  content: counter(step);
+  content: counter(step) / '';
+  grid-row: span 2;
+  color: var(--pink-500);
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 600;
+  line-height: 0.9;
+}
+
+.steps__item p {
+  color: var(--color-text-muted);
+}
+
+.how-to-order__note {
+  margin-block: 2rem 1.25rem;
+  font-weight: 800;
+}
+
+.visit {
+  background: var(--color-band);
+}
+
+.visit h2 {
+  margin-bottom: 1.75rem;
+}
+
+.visit__grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 48rem) {
+  .visit__grid {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+.visit__block {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+@media (min-width: 48rem) {
+  .visit__block {
+    padding: 1.5rem 1.75rem;
+  }
+}
+
+.visit__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.visit__block .visit__heading:not(:first-child) {
+  margin-top: 1rem;
+}
+
+.hours {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.hours th,
+.hours td {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.hours th {
+  padding-right: 1rem;
+  font-weight: 800;
+}
+
+.hours tr:last-child th,
+.hours tr:last-child td {
+  border-bottom: none;
+}
+
+.visit__note {
+  color: var(--color-text-muted);
+  font-size: var(--step--1);
+}
+
+.visit__address {
+  display: grid;
+  font-style: normal;
+  font-size: var(--step-1);
+  line-height: 1.4;
+}
+
+.visit__phone {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.visit__phone a {
+  color: var(--color-text);
+}
+
+.copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.copy__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--step--1);
+  font-weight: 800;
+}
