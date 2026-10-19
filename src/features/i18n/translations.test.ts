@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { store } from '../../config/store';
+import adminEn from '../admin/locales/en.json';
 import { resources } from './i18n';
 import { locales } from './locales';
 
@@ -37,6 +38,10 @@ describe('interface text (FR-17, BRIEF 5)', () => {
     expect(baseKeys(flat.ko)).toEqual(english);
   });
 
+  it('has no empty text in the staff panel', () => {
+    for (const [key, value] of flatten(adminEn)) expect(value.trim(), key).not.toBe('');
+  });
+
   it('has no empty text', () => {
     for (const locale of locales) {
       for (const [key, value] of flat[locale]) {
@@ -45,9 +50,10 @@ describe('interface text (FR-17, BRIEF 5)', () => {
     }
   });
 
-  it('uses no em dashes, in any language or in the store facts', () => {
+  it('uses no em dashes, in any language, the staff panel or the store facts', () => {
     const texts = [
       ...locales.flatMap((locale) => [...flat[locale].values()]),
+      ...flatten(adminEn).values(),
       JSON.stringify(store),
     ];
     for (const text of texts) expect(text).not.toContain('—');

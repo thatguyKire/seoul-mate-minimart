@@ -2,7 +2,7 @@
 -- or adds an unsafe function (NFR-SEC-01, NFR-SEC-02, NFR-SEC-05).
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(9);
+select plan(10);
 
 select is_empty(
   $$
@@ -60,6 +60,11 @@ select set_eq(
 select ok(
   not has_column_privilege('anon', 'public.items', 'updated_by', 'SELECT'),
   'Visitors cannot read who last changed an item'
+);
+
+select ok(
+  has_column_privilege('anon', 'public.items', 'photo_format', 'SELECT'),
+  'Visitors can read the photo format, to build photo addresses'
 );
 
 select is_empty(

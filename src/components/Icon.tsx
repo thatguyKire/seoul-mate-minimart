@@ -38,6 +38,7 @@ const icons = {
     </>
   ),
   chevronDown: <path d="M6.5 9.5l5.5 5.5 5.5-5.5" />,
+  chevronUp: <path d="M6.5 14.5l5.5-5.5 5.5 5.5" />,
   search: (
     <>
       <circle cx="10.5" cy="10.5" r="6.5" />

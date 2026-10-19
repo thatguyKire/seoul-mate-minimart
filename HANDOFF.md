@@ -1,6 +1,6 @@
 # Handoff
 
-Last updated: 2026-10-18
+Last updated: 2026-10-19
 
 ## 1. Goal
 
@@ -8,45 +8,43 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 
 ## 2. Current State
 
-- Steps 1 to 5 are done: requirements, design (approved by the owner), repository setup, database, and the public catalog.
-- The public site works against any Supabase project: menu by category with live availability, search, category filter, English, Filipino and Korean under `/en/`, `/fil/`, `/ko/`, store information, how to order, mobile menu, floating Messenger button. Light and dark themes follow the system setting; the toggle comes in step 8.
-- Staging Supabase project: `vebcdxmhoeksxnlyrmqf`, free plan, Tokyo region, with all four migrations and the sample data ([D-032](docs/DECISIONS.md#d-032-staging-migrations-applied-through-the-supabase-connector-until-step-10)). Its URL and publishable key are in `.env.local` on the development PC (git-ignored), so `npm run dev` shows real data. The owner set its auth settings in the dashboard on 2026-10-19 to match `supabase/config.toml` ([auth] section): sign-ups off, 900-second access tokens, passwords of 12 or more characters with lowercase, uppercase and digits, TOTP two-factor, 15 sign-ins per 5 minutes. The public `/auth/v1/settings` endpoint confirms sign-ups are off and email is the only login method; the other settings are not visible from outside. Session time-box and inactivity limits need a paid plan, so the admin panel enforces them in the browser (SDD 5.4).
-- End-to-end tests use a fake Supabase locally; CI also runs `e2e/live-stack.spec.ts` against a real local stack ([D-031](docs/DECISIONS.md#d-031-end-to-end-tests-use-a-fake-supabase-plus-one-live-stack-test-in-ci)). Docker is still not installed.
-- Initial JavaScript is 126 KB gzipped of the 170 KB budget ([D-030](docs/DECISIONS.md#d-030-the-public-site-uses-supabases-rest-and-realtime-clients-directly)).
-- `main` is protected ([D-026](docs/DECISIONS.md#d-026-protected-main-squash-merges-conventional-commit-titles)).
+- Steps 1 to 6 are done: requirements, design (approved by the owner), repository setup, database, the public catalog, and the staff panel at `/admin`.
+- Staff panel: login (generic refusal message, show-password toggle), non-staff accounts logged straight out, optional two-factor login, logout after 60 idle minutes or 12 hours; items (one-tap stock switch, mark all out of stock, add, edit, delete, reorder, photos processed in the browser); categories (add, rename, reorder, delete refused while in use). English only (D-025). It is its own chunk (69 KB gzipped); the public site's initial JavaScript is 126 KB of 170 KB.
+- Database: five migrations. The fifth, `20261019120000_photo_format.sql`, adds `items.photo_format` (D-034). 97 pgTAP assertions.
+- Staging Supabase project `vebcdxmhoeksxnlyrmqf` (free plan, Tokyo): migrations and sample data from step 4 applied ([D-032](docs/DECISIONS.md#d-032-staging-migrations-applied-through-the-supabase-connector-until-step-10)); the photo format migration is applied after this step's CI passes (Next Steps 1). Its URL and publishable key are in `.env.local` on the development PC (git-ignored). Auth settings set by the owner on 2026-10-19 to match `supabase/config.toml`; sign-ups confirmed off.
+- No staff account exists on staging yet: the owner creates them (README, "Staff accounts").
+- Supabase Auth's login limit answers `429` without `Retry-After`; kept on purpose ([D-033](docs/DECISIONS.md#d-033-staff-login-keeps-supabase-auths-limit-without-retry-after)).
 - Deferred by the owner: hosting ([D-003](docs/DECISIONS.md#d-003-hosting-deferred)) and the Messenger bot ([D-004](docs/DECISIONS.md#d-004-messenger-bot-deferred)).
 
 ## 3. Active Files
 
-- App shell: `src/main.tsx`, `src/App.tsx`, `src/app/` (locale route and layout, root redirect, error boundary)
-- Catalog: `src/features/catalog/` (`liveMenu.ts` holds the live-update logic, `supabaseMenuSource.ts` the Supabase calls, `MenuSection.tsx` the UI)
-- Search, languages, store information: `src/features/search/`, `src/features/i18n/` (translations in `locales/*.json`), `src/features/store-info/`, `src/config/store.ts`
-- Shared: `src/components/`, `src/lib/` (`supabase.ts`, `format.ts`, `database.types.ts`), styles in `src/index.css` and one CSS file per area
-- Tests: `src/**/*.test.ts(x)`, `src/test/`, `e2e/` (`support/fakeSupabase.ts`), `.github/workflows/ci.yml` (end-to-end job now starts a local Supabase)
-- Docs: `docs/SRS.md` (traceability 6.1), `docs/SDD.md` (2.1, 2.2, E3), `docs/DECISIONS.md` (D-030 to D-032), `docs/TRD.md`, `docs/ARCHITECTURE.md` (6), `docs/BRIEF.md`, `README.md`, `CHANGELOG.md`
+- Staff panel: `src/features/admin/` (`AdminApp.tsx` routes and login gate; `session/` login state and session limits; `adminData.ts` every read and write; `schemas.ts` form rules; `photos/` photo checks, processing and field; `pages/`; `components/`; `locales/en.json`; `admin.css`)
+- `src/App.tsx` (lazy `/admin` route, new-version fallback), `src/lib/database.types.ts` (full rows, functions), `src/features/catalog/ItemPhoto.tsx` (stored format)
+- `supabase/migrations/20261019120000_photo_format.sql`, `supabase/tests/database/01_structure.test.sql` and `06_constraints.test.sql`
+- `scripts/create-local-staff.mjs` (`npm run db:staff`), `.github/workflows/ci.yml` (end-to-end job creates two local logins)
+- Tests: `src/features/admin/*.test.ts`, `e2e/admin.spec.ts`, `e2e/live-stack.spec.ts`, `e2e/support/fakeSupabase.ts` (now with auth, writes and storage), `e2e/support/photos.ts`
+- Docs: `docs/DECISIONS.md` (D-033 to D-035, D-024 replaced), `docs/SDD.md` (2.1 tree, 2.2, 2.3, E6, 5.4, 5.5, 5.8), `docs/SRS.md` (6.1), `docs/BACKEND-SCHEMA.md` (2.2, 3, 8), `README.md` (Staff accounts), `CHANGELOG.md`
 
 ## 4. Changes Made
 
-- Step 5, public catalog, in one pull request: everything in section 2 above, 69 unit tests and 51 end-to-end tests (phone and desktop sizes), all passing locally in Edge.
-- Built store information and how to order (FR-22 to FR-26) in this step too, because the hero must say where the store is and how to order. FAQ, contact form, legal pages, cookie banner, theme toggle, back to top, scroll progress and print styles stay in step 8.
-- Visual check with screenshots in light and dark, English and Korean, phone and desktop. "Last updated" moved under the Menu heading so the floating button never covers it.
-- Step 5 merged (#5); the live-stack tests passed in CI on their first run.
-- Staging set up through the Supabase connector (D-032). Verified there: access rules as a visitor, security advisor, the site loading real data, and a database change showing on an open page 1.1 seconds after the API showed it (from the development PC).
+- Step 6 in one pull request: everything in section 2, 85 unit tests, 79 end-to-end tests at phone and desktop sizes plus the CI-only real-stack tests, all passing locally in Edge.
+- Checked D-024 on staging: about 41 wrong logins in a row get `429 over_request_rate_limit`, without `Retry-After`. Recorded as D-033.
+- Settled the photo format question from step 5 with a column (D-034).
+- Visual check of the panel at phone and desktop sizes; rows were reworked so the reorder arrows sit under the switch instead of on a line of their own.
 
 ## 5. Failed Attempts
 
-- The full `@supabase/supabase-js` client put initial JavaScript at 157 KB, too close to the budget once Sentry arrives. Replaced with its REST and Realtime packages (D-030).
-- Concatenated strings in a `select(...)` call lose their literal type, so the Supabase client typed every row as an error. Keep each column list as one string literal.
-- `@typescript-eslint/no-generated-empty-object-type` flags the empty `Views` and `Functions` groups in `database.types.ts`; they carry a disable comment because the client requires them.
-- Playwright's `test.skip(({}, testInfo) => ...)` is not allowed: the condition gets fixtures only. The live-stack test skips on `isMobile` instead.
-- Suspected that a quick remount would reuse a closing Realtime channel with the same name. It does not: the client drops a channel from its list as soon as it starts leaving. Kept the remount test in `catalog.spec.ts` as a guard.
-- Still true: on Windows, Playwright takes about two minutes to stop a preview server it started itself, so run `npm run preview:e2e` in another terminal first.
-- Stopping a background `npm run preview:e2e` task leaves its Node process holding port 4173. Find it with `Get-NetTCPConnection -LocalPort 4173` and stop it.
-- The Supabase connector stamps migrations with the current time, not the file's version. Fix the version afterwards (D-032), or later `supabase db push` treats them as unknown.
+- JavaScript's `String.replace` reads `$$` in the replacement as a single `$`, which silently broke SQL `$$` quotes in an edit script. Use `split(from).join(to)` for text edits.
+- React's lint rule `set-state-in-effect` flags loaders that call a state-setting function from an effect, even after an `await`. Loaders now subscribe to a promise in the effect and reload by bumping a counter.
+- `FormEvent` is deprecated in the current React types; use `SubmitEvent` for form submit handlers.
+- `react-refresh/only-export-components`: keep contexts and hooks (`session/authContext.ts`) apart from component files.
+- Still true: on Windows, run `npm run preview:e2e` in another terminal before `npm run test:e2e`, and stop the leftover Node process on port 4173 afterwards (`Get-NetTCPConnection -LocalPort 4173`).
 
 ## 6. Next Steps
 
-1. Step 6, admin panel: login, item editing, availability switch, confirmation modals, photo upload, and the local-only staff account script (D-028). It uses the full supabase-js client, lazy-loaded under `/admin`. Decide there how visitors learn a photo's format: today the card tries WebP, then JPEG, so a JPEG-only photo costs one failed request (D-019). Storing the format with the photo, or always uploading both formats, would remove it.
-2. Owner: test the m.me link on an Android phone, an iPhone and a desktop (D-014); check live updates on a real phone over mobile data (PRD S4); find fluent Filipino and Korean reviewers for the drafted text (D-008).
-3. Every new migration: after CI passes, apply it to staging as in D-032, until step 10 automates it.
-4. Before the menu passes 1,000 published items, page the item reads (ARCHITECTURE 6).
+1. After this step's CI passes: apply `20261019120000_photo_format.sql` to staging and set its recorded version, as in D-032. Then merge.
+2. Owner: create a first staff account on staging (README, "Staff accounts") and try the panel from a phone, for example with `npm run dev` on the PC and the phone on the same network, until hosting exists. PRD S3: mark an item out of stock in under 10 seconds.
+3. Step 7, the Messenger bot, waits for the owner (D-004). Step 8 is next: contact form and its function, staff messages page, FAQ, legal pages, cookie banner and UTM capture, theme toggle, back to top, scroll progress, print styles, favicons and web manifest.
+4. Owner: test the m.me link on Android, iPhone and desktop (D-014); check live updates on a real phone over mobile data (PRD S4); find fluent Filipino and Korean reviewers (D-008).
+5. Every new migration: after CI passes, apply it to staging as in D-032, until step 10 automates it.
+6. Before the menu passes 1,000 published items, page the item reads (ARCHITECTURE 6).

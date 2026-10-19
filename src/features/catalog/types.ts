@@ -9,7 +9,24 @@ export type Category = Pick<
 >;
 
 /** The item columns visitors are allowed to read (E2, BACKEND-SCHEMA 3). */
-export type Item = Tables['items']['Row'];
+export type Item = Pick<
+  Tables['items']['Row'],
+  | 'id'
+  | 'category_id'
+  | 'name_en'
+  | 'name_fil'
+  | 'name_ko'
+  | 'description_en'
+  | 'description_fil'
+  | 'description_ko'
+  | 'price_centavos'
+  | 'photo_path'
+  | 'photo_format'
+  | 'is_available'
+  | 'is_sample'
+  | 'sort_order'
+  | 'availability_changed_at'
+>;
 
 export interface Menu {
   categories: readonly Category[];
