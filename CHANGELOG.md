@@ -29,6 +29,11 @@ All notable changes to this project are recorded here. The format follows [Keep 
 - Photos: checked by their first bytes and size, then resized to three widths in the browser and saved as WebP or JPEG with all metadata, including location, removed.
 - Categories: add, rename in three languages, reorder, and delete, refused in plain words while a category still has items.
 - `npm run db:staff`: creates a staff login on the local Supabase stack only.
+- Light and dark themes with a toggle; the system setting decides until the visitor chooses, and the right theme is applied before the first paint.
+- Privacy banner with equal Accept and Decline, changeable from the footer; campaign details from the landing link are saved for the browser session only after Accept.
+- Privacy policy and terms of use in English, Filipino and Korean, marked as awaiting legal review.
+- Frequently asked questions as drafts awaiting the store's answers; a production build fails while any draft remains.
+- Back to top button, a scroll progress bar on the menu and legal pages, page titles, a print layout for the menu, PNG icons, an Apple touch icon and a web manifest.
 
 ### Changed
 

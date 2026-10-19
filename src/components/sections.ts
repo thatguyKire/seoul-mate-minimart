@@ -5,6 +5,7 @@ import { useLocale } from '../features/i18n/localeContext';
 export const sections = [
   { id: 'menu', labelKey: 'header.menu' },
   { id: 'how-to-order', labelKey: 'header.howToOrder' },
+  { id: 'faq', labelKey: 'header.faq' },
   { id: 'visit', labelKey: 'header.visit' },
 ] as const;
 

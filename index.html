@@ -7,7 +7,15 @@
       name="description"
       content="Seoul-Mate Minimart in Masbate City: Korean snacks and drinks, beauty and skincare, instant noodles and household essentials."
     />
+    <!-- Sets light or dark before the first paint (FR-66). A file, so no inline script. -->
+    <script src="/theme-init.js"></script>
+    <!-- FR-69: SVG favicon, PNG fallback, Apple touch icon and web manifest. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121733" media="(prefers-color-scheme: dark)" />
     <title>Seoul-Mate Minimart</title>
   </head>
   <body>

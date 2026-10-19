@@ -290,3 +290,11 @@ Each entry records one decision: date, context, the choice, and the alternatives
 - **Context:** Supabase Auth returns the QR code for setting up two-factor login (FR-47) as an SVG image in a `data:` address. The planned Content Security Policy allows images only from the site and Supabase (SDD 5.5).
 - **Decision:** Add `data:` to `img-src`. An image in an `<img>` element cannot run scripts, even an SVG one, so this does not weaken the protection against injected scripts. The setup screen also shows the key as text, for apps that cannot scan.
 - **Alternatives considered:** Drawing the QR code ourselves from the `otpauth:` address (rejected: another dependency for one screen). Showing only the text key (rejected: harder for staff on a phone).
+
+## D-036: The privacy banner comes before any analytics
+
+- **Date:** 2026-10-19
+- **Status:** Accepted
+- **Context:** The brief asks for a cookie banner, consent before analytics, and UTM capture after consent (FR-54 to FR-57). The analytics provider waits for the hosting decision (D-003), so there is nothing to load yet. The UTM values still need consent, because they are kept in the browser and attached to contact messages.
+- **Decision:** Build the banner, the stored choice and the UTM handling now. The banner asks about what actually happens today and what may come: noting how the visitor found the site and counting visits. Accept saves the UTM values for the browser session; Decline discards them. When a provider is chosen, it starts only on Accept, never under `/admin`, the CSP and privacy policy name it, and the banner text is checked again.
+- **Alternatives considered:** Waiting for the provider (rejected: UTM capture needs consent now, and the banner would otherwise be built in a hurry at launch). Asking about "cookies" (rejected: the site sets no cookies; it uses browser storage, and the wording should say what it does).

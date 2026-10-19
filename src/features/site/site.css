@@ -1,0 +1,275 @@
+/* Theme toggle, privacy banner, back to top, scroll progress, FAQ and legal pages (step 8). */
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding-inline: 0.75rem;
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  border-color: var(--color-text);
+  background: var(--color-tint);
+}
+
+.theme-toggle[aria-pressed='true'] {
+  border-color: var(--color-text);
+}
+
+/* In the header: the icon only, with the label kept for screen readers. */
+.theme-toggle--compact {
+  width: 2.75rem;
+  justify-content: center;
+  padding: 0;
+}
+
+.theme-toggle--compact span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.site-header__language {
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (min-width: 52rem) {
+  .site-header__language {
+    display: flex;
+  }
+}
+
+/* The privacy banner, at the bottom of the floating stack (FR-54, FR-65). */
+.consent {
+  display: grid;
+  gap: 0.5rem;
+  width: min(32rem, calc(100vw - 2rem));
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-text);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: 0 4px 0 var(--color-border);
+}
+
+.consent__title {
+  font-size: var(--step-0);
+}
+
+@media (min-width: 40rem) {
+  .consent {
+    gap: 0.75rem;
+    padding: 1rem 1.125rem;
+  }
+
+  .consent__title {
+    font-size: var(--step-1);
+  }
+}
+
+.consent__text {
+  font-size: var(--step--1);
+}
+
+.consent__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* Accept and Decline look the same: neither is pushed (FR-54). */
+.button--consent {
+  border-color: var(--color-text);
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+.button--consent:hover,
+.button--consent:focus-visible {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  color: var(--color-on-accent);
+}
+
+/* Back to top (FR-63). */
+.floating-top {
+  display: inline-grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border: 2px solid var(--color-text);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--color-border);
+}
+
+.floating-top:hover,
+.floating-top:focus-visible {
+  background: var(--color-tint);
+}
+
+/* Scroll progress under the sticky header (FR-64). Width follows --progress, 0 to 1. */
+.scroll-progress {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  z-index: 19;
+  width: 100%;
+  height: 3px;
+  background: var(--pink-500);
+  transform: scaleX(var(--progress, 0));
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+/* FAQ (FR-33). */
+.faq {
+  border-top: 1px solid var(--color-border);
+}
+
+.faq h2 {
+  margin-bottom: 1.5rem;
+}
+
+.faq__list {
+  display: grid;
+  max-width: 48rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.faq__item {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.faq__question {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.75rem 0.5rem;
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq__question::-webkit-details-marker {
+  display: none;
+}
+
+.faq__question > span:first-child {
+  flex: 1;
+}
+
+.faq__question:hover,
+.faq__question:focus-visible {
+  background: var(--color-tint);
+}
+
+.faq__chevron {
+  transition: transform 120ms ease;
+}
+
+.faq__item[open] .faq__chevron {
+  transform: rotate(180deg);
+}
+
+.faq__answer {
+  max-width: 65ch;
+  padding: 0 0.5rem 1.25rem;
+  color: var(--color-text-muted);
+}
+
+/* Legal pages (FR-58, FR-59). */
+.legal {
+  max-width: 48rem;
+  padding-block: 2.5rem 4rem;
+}
+
+.legal h1 {
+  font-size: var(--step-4);
+}
+
+.legal__updated {
+  margin-top: 0.5rem;
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+.legal__notices {
+  display: grid;
+  gap: 0.25rem;
+  margin-block: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--pink-500);
+  background: var(--color-tint);
+  font-size: var(--step--1);
+  font-weight: 700;
+}
+
+.legal__intro {
+  font-size: var(--step-1);
+  line-height: 1.5;
+}
+
+.legal__section {
+  margin-top: 2rem;
+}
+
+.legal__section h2 {
+  margin-bottom: 0.75rem;
+  font-size: var(--step-2);
+}
+
+.legal__section p,
+.legal__section ul {
+  max-width: 65ch;
+  margin-bottom: 0.75rem;
+}
+
+.legal__section ul {
+  display: grid;
+  gap: 0.5rem;
+  padding-left: 1.25rem;
+}
+
+.site-footer__legal {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+}
+
+.site-footer__button {
+  min-height: 2.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+
+.site-footer__button:hover,
+.site-footer__button:focus-visible {
+  text-decoration-thickness: 2px;
+}

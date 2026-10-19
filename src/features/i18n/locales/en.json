@@ -7,7 +7,8 @@
     "visit": "Visit us",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "mobileMenuTitle": "Site menu"
+    "mobileMenuTitle": "Site menu",
+    "faq": "FAQ"
   },
   "language": {
     "current": "Language: {{name}}",
@@ -76,11 +77,37 @@
   },
   "footer": {
     "tagline": "Your one stop shop for Korean goodies and daily needs.",
-    "facebook": "Seoul-Mate Minimart on Facebook"
+    "facebook": "Seoul-Mate Minimart on Facebook",
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
+    "privacyChoices": "Privacy choices"
   },
   "notFound": {
     "title": "Page not found",
     "body": "This page doesn't exist. The menu is on the home page.",
     "home": "Go to the menu"
+  },
+  "theme": {
+    "dark": "Dark theme",
+    "heading": "Theme"
+  },
+  "floating": {
+    "backToTop": "Back to top"
+  },
+  "consent": {
+    "title": "Your privacy",
+    "text": "May we note how you found us, such as the Facebook post you came from, and count visits? Nothing is saved unless you accept.",
+    "policy": "Privacy policy",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "draft": "Draft"
+  },
+  "legal": {
+    "updated": "Last updated:",
+    "review": "This page is awaiting review by a lawyer.",
+    "englishPrevails": "If the English, Filipino and Korean versions differ, the English version prevails."
   }
 }

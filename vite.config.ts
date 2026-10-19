@@ -1,6 +1,34 @@
 /// <reference types="vitest/config" />
+import { readFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
+
+/**
+ * FR-33: a production build fails while any FAQ entry is still a placeholder marked "todo".
+ * Production means VITE_APP_ENV=production, the setting only the live site's build uses.
+ */
+function faqReadyForProduction(appEnv: string | undefined): Plugin {
+  return {
+    name: 'faq-ready-for-production',
+    apply: 'build',
+    buildStart() {
+      if (appEnv !== 'production') return;
+      const drafts = ['en', 'fil', 'ko'].flatMap((locale) => {
+        const path = `src/features/faq/faq.${locale}.json`;
+        const entries = JSON.parse(readFileSync(path, 'utf8')) as {
+          question: string;
+          todo?: boolean;
+        }[];
+        return entries.filter((entry) => entry.todo).map((entry) => `${locale}: ${entry.question}`);
+      });
+      if (drafts.length > 0) {
+        this.error(
+          `FAQ entries still marked todo, so this production build stops (FR-33): ${drafts.join('; ')}`,
+        );
+      }
+    },
+  };
+}
 
 export default defineConfig(({ mode }) => {
   // End-to-end builds (`npm run build:e2e`) point at the local Supabase stack's address.
@@ -13,7 +41,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    plugins: [react()],
+    plugins: [react(), faqReadyForProduction(loadEnv(mode, process.cwd(), 'VITE_').VITE_APP_ENV)],
     build: {
       // No public source maps (NFR-SEC-07). Step 10 uploads hidden maps to Sentry from CI.
       sourcemap: false,

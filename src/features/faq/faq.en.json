@@ -1,0 +1,27 @@
+[
+  {
+    "question": "Do you deliver?",
+    "answer": "Not yet. Order on Messenger, then pick up your order at the store on Quezon St., Masbate City.",
+    "todo": true
+  },
+  {
+    "question": "How do I pay?",
+    "answer": "Pay with cash or GCash when you pick up your order.",
+    "todo": true
+  },
+  {
+    "question": "Can you hold an item for me?",
+    "answer": "Message us on Messenger with what you need. Staff will tell you if they can set it aside and for how long.",
+    "todo": true
+  },
+  {
+    "question": "How current is the stock shown here?",
+    "answer": "Staff update it during the day, and changes show on open pages within seconds. If you need to be sure, message us before you come.",
+    "todo": true
+  },
+  {
+    "question": "Can I ask for something that isn't on the menu?",
+    "answer": "Yes. Ask us on Messenger. We may have it in the store, or be able to order it.",
+    "todo": true
+  }
+]

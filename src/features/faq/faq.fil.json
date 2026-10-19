@@ -1,0 +1,27 @@
+[
+  {
+    "question": "Nagde-deliver ba kayo?",
+    "answer": "Hindi pa. Umorder sa Messenger, saka kunin ang order mo sa tindahan sa Quezon St., Masbate City.",
+    "todo": true
+  },
+  {
+    "question": "Paano magbayad?",
+    "answer": "Magbayad gamit ang cash o GCash pagkuha mo ng order.",
+    "todo": true
+  },
+  {
+    "question": "Puwede bang ipatabi ang isang item?",
+    "answer": "Mag-message sa amin sa Messenger kung ano ang kailangan mo. Sasabihin ng staff kung maitatabi nila ito at hanggang kailan.",
+    "todo": true
+  },
+  {
+    "question": "Gaano ka-update ang stock na nakikita dito?",
+    "answer": "Ina-update ito ng staff sa buong araw, at lumalabas ang mga pagbabago sa mga bukas na page sa loob ng ilang segundo. Kung gusto mong makasiguro, mag-message muna bago pumunta.",
+    "todo": true
+  },
+  {
+    "question": "Puwede ba akong magtanong ng item na wala sa menu?",
+    "answer": "Oo. Magtanong sa amin sa Messenger. Baka meron kami sa tindahan, o baka maipa-order namin ito.",
+    "todo": true
+  }
+]

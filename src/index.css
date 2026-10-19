@@ -4,10 +4,11 @@
  *   - Hot pink #e8508a is 3.5:1 on white: large text, icons and borders only, never body text.
  *   - Buttons and links use the darker #c2326b, 5.3:1 with white text.
  *   - Navy #1e2b5e is 13.4:1 on white and 9.9:1 on soft pink.
- * The theme toggle (step 8) builds on these tokens; until then the system setting decides.
+ * Dark tokens apply under <html data-theme="dark">, set by public/theme-init.js before the first
+ * paint from the visitor's choice or the system setting (FR-66).
  */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   --pink-500: #e8508a;
   --pink-600: #c2326b;
@@ -60,31 +61,30 @@
   --gutter: 1rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: var(--navy-950);
-    --color-text: #f6eef3;
-    --color-text-muted: #c3c8dc;
-    --color-band: #1b2247;
-    --color-surface: #1b2247;
-    --color-tint: #262e58;
-    --color-border: #343d6b;
-    --color-border-strong: #59628f;
-    --color-link: #f27ba8;
-    --color-accent: #f27ba8;
-    --color-accent-hover: #f79bbd;
-    --color-on-accent: var(--navy-950);
-    --color-focus: var(--pink-100);
-    --color-strip: var(--pink-100);
-    --color-on-strip: var(--navy-900);
-    --color-strip-icon: var(--pink-600);
-    --color-strip-out: #2b335e;
-    --color-on-strip-out: #d9dcea;
-    --color-placeholder: #232b55;
-    --color-skeleton: #2b335e;
-    --color-footer: #0c1027;
-    --color-on-footer: #f6eef3;
-  }
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: var(--navy-950);
+  --color-text: #f6eef3;
+  --color-text-muted: #c3c8dc;
+  --color-band: #1b2247;
+  --color-surface: #1b2247;
+  --color-tint: #262e58;
+  --color-border: #343d6b;
+  --color-border-strong: #59628f;
+  --color-link: #f27ba8;
+  --color-accent: #f27ba8;
+  --color-accent-hover: #f79bbd;
+  --color-on-accent: var(--navy-950);
+  --color-focus: var(--pink-100);
+  --color-strip: var(--pink-100);
+  --color-on-strip: var(--navy-900);
+  --color-strip-icon: var(--pink-600);
+  --color-strip-out: #2b335e;
+  --color-on-strip-out: #d9dcea;
+  --color-placeholder: #232b55;
+  --color-skeleton: #2b335e;
+  --color-footer: #0c1027;
+  --color-on-footer: #f6eef3;
 }
 
 @media (min-width: 48rem) {
@@ -102,7 +102,7 @@
 html {
   /* Anchored headings land below the sticky header, focused elements above the floating button (FR-60, NFR-ACC-07). */
   scroll-padding-top: calc(var(--header-height) + 1rem);
-  scroll-padding-bottom: 5rem;
+  scroll-padding-bottom: calc(var(--floating-space, 4rem) + 1rem);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }

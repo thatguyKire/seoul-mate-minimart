@@ -4,6 +4,7 @@ import { intlLocales, type Locale } from '../features/i18n/locales';
 
 const priceFormats = new Map<Locale, Intl.NumberFormat>();
 const dateTimeFormats = new Map<Locale, Intl.DateTimeFormat>();
+const dateFormats = new Map<Locale, Intl.DateTimeFormat>();
 const clockFormats = new Map<Locale, Intl.DateTimeFormat>();
 const weekdayFormats = new Map<Locale, Intl.DateTimeFormat>();
 
@@ -44,6 +45,16 @@ export function formatDateTime(iso: string, locale: Locale): string {
       }),
   );
   return format.format(new Date(iso));
+}
+
+/** A calendar date such as "2026-10-19" in the visitor's language, for example "October 19, 2026". */
+export function formatDate(isoDate: string, locale: Locale): string {
+  const format = cached(
+    dateFormats,
+    locale,
+    () => new Intl.DateTimeFormat(intlLocales[locale], { dateStyle: 'long', timeZone: 'UTC' }),
+  );
+  return format.format(new Date(`${isoDate}T00:00:00Z`));
 }
 
 /** A store clock time such as "14:00" in the visitor's language, for example "2:00 PM". */

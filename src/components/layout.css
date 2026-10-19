@@ -266,8 +266,8 @@
 }
 
 .site-footer {
-  /* Room under the last line for the floating button (FR-65). */
-  padding: 3rem 0 6rem;
+  /* Room under the last line for the floating stack, whatever it holds (FR-65). */
+  padding: 3rem 0 calc(var(--floating-space, 4rem) + 2rem);
   background: var(--color-footer);
   color: var(--color-on-footer);
 }
