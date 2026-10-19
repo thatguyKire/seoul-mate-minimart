@@ -173,3 +173,82 @@ test('staff upload a photo that passes the storage rules and shows on the menu (
     .poll(() => photo.evaluate((img: HTMLImageElement) => img.naturalWidth))
     .toBeGreaterThan(0);
 });
+
+const site = 'http://127.0.0.1:4173';
+
+async function postContact(body: Record<string, unknown>, origin = site) {
+  return fetch(`${url}/functions/v1/contact`, {
+    method: 'POST',
+    headers: { origin, 'content-type': 'application/json' },
+    body: JSON.stringify({ locale: 'en', website: '', ...body }),
+  });
+}
+
+async function storedMessages(name: string): Promise<Record<string, unknown>[]> {
+  const response = await serviceRequest(
+    `/rest/v1/contact_messages?name=eq.${encodeURIComponent(name)}`,
+    { method: 'GET' },
+  );
+  return (await response.json()) as Record<string, unknown>[];
+}
+
+test('a visitor message goes through the real function, and staff read it (FR-29 to FR-32)', async ({
+  context,
+}) => {
+  const visitor = await context.newPage();
+  await visitor.goto('/en/#contact');
+  const form = visitor.getByRole('region', { name: 'Send us a message' });
+  await form.getByLabel('Your name').fill('Live Stack Visitor');
+  await form.getByLabel('Mobile number or email').fill('0917 555 0101');
+  await form.getByLabel('Message').fill('Is the Banana Milk back in stock?');
+  await form.getByRole('button', { name: 'Send message' }).click();
+  await expect(form.getByRole('status')).toContainText('Thanks, Live Stack Visitor.');
+  expect(await storedMessages('Live Stack Visitor')).toMatchObject([
+    {
+      contact: '0917 555 0101',
+      message: 'Is the Banana Milk back in stock?',
+      locale: 'en',
+      utm: null,
+    },
+  ]);
+
+  const page = await context.newPage();
+  await logIn(page, staff);
+  await page.getByRole('link', { name: 'Messages' }).click();
+  await expect(page.getByText('Is the Banana Milk back in stock?')).toBeVisible();
+});
+
+test('the function refuses other sites, drops bots and limits each address (NFR-SEC-12, -16, -17)', async () => {
+  const foreign = await postContact(
+    { name: 'Foreign', contact: 'a@example.com', message: 'Hi' },
+    'https://evil.example',
+  );
+  expect(foreign.status).toBe(403);
+
+  const bot = await postContact({
+    name: 'Honeypot Bot',
+    contact: 'bot@example.com',
+    message: 'Buy now',
+    website: 'https://spam.example',
+  });
+  expect(bot.status).toBe(200);
+  expect(await storedMessages('Honeypot Bot')).toEqual([]);
+
+  // The visitor's message above was the first from this address in this window.
+  for (let i = 2; i <= 5; i += 1) {
+    const response = await postContact({
+      name: 'Rate Test',
+      contact: 'r@example.com',
+      message: `Message ${String(i)}`,
+    });
+    expect(response.status, `message ${String(i)}`).toBe(200);
+  }
+  const limited = await postContact({
+    name: 'Rate Test',
+    contact: 'r@example.com',
+    message: 'One too many',
+  });
+  expect(limited.status).toBe(429);
+  expect(Number(limited.headers.get('retry-after'))).toBeGreaterThan(0);
+  expect(await storedMessages('Rate Test')).toHaveLength(4);
+});

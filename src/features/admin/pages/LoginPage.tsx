@@ -6,7 +6,7 @@ import {
   FailureMessage,
   PasswordField,
   TextField,
-} from '../components/fields';
+} from '../../../components/fields';
 import { useAuth, type SignInFailure, type SignOutNotice } from '../session/authContext';
 
 /** Staff login (FR-34 to FR-36). There is no sign-up: the owner creates accounts (D-001). */
@@ -79,6 +79,7 @@ export function LoginPage({ notice }: { notice: SignOutNotice | null }) {
           id="login-password"
           label={t('login.password')}
           autoComplete="current-password"
+          toggleLabel={t('login.showPassword')}
           value={password}
           error={errors.password}
           onChange={(event) => {

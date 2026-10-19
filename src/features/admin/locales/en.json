@@ -10,7 +10,8 @@
     "security": "Security",
     "viewMenu": "View the menu",
     "logOut": "Log out",
-    "signedInAs": "Logged in as {{email}}"
+    "signedInAs": "Logged in as {{email}}",
+    "messages": "Messages"
   },
   "login": {
     "title": "Staff login",
@@ -176,5 +177,13 @@
     "price": "Enter a price in pesos, such as 95 or 95.50",
     "priceRange": "Price must be ₱0 to ₱100,000",
     "slugFormat": "Use lowercase letters, numbers and single dashes, up to 40 characters"
+  },
+  "messages": {
+    "title": "Messages",
+    "intro": "Sent with the contact form on the site, newest first. They are deleted automatically after 180 days.",
+    "empty": "No messages yet.",
+    "received": "Received",
+    "language": "Page language",
+    "campaign": "Came from"
   }
 }

@@ -93,8 +93,12 @@ jobs:
       - run: npx playwright install --with-deps chromium
       # A throwaway local stack with the seed data, so e2e/live-stack.spec.ts can prove RLS and
       # live updates for real. The other tests answer Supabase requests themselves.
-      - name: Start local Supabase
-        run: npx supabase start -x studio,imgproxy,mailpit,logflare,vector,edge-runtime,supavisor,postgres-meta
+      # The contact function's settings for this throwaway stack, with a fresh random salt.
+      - name: Settings for the local contact function
+        run: |
+          printf 'ALLOWED_ORIGINS=http://127.0.0.1:4173\nCONTACT_IP_SALT=%s\n' "$(openssl rand -hex 32)" > supabase/functions/.env
+      - name: Start local Supabase, with Edge Functions
+        run: npx supabase start -x studio,imgproxy,mailpit,logflare,vector,supavisor,postgres-meta
       - name: Pass the local stack's settings to the build and tests
         run: |
           npx supabase status -o env > "$RUNNER_TEMP/supabase.env"
@@ -113,6 +117,15 @@ jobs:
             echo "E2E_SERVICE_ROLE_KEY=$service_key"
             echo "E2E_LIVE_SUPABASE=1"
           } >> "$GITHUB_ENV"
+      - name: Check that the contact function answers
+        run: |
+          for attempt in $(seq 1 30); do
+            status=$(curl -s -o /dev/null -w '%{http_code}' -X OPTIONS -H 'Origin: http://127.0.0.1:4173' "$VITE_SUPABASE_URL/functions/v1/contact")
+            if [ "$status" = "204" ]; then exit 0; fi
+            sleep 2
+          done
+          echo "::error::The contact function did not answer its preflight (last status $status)"
+          exit 1
       - name: Create a staff login and a non-staff login on the local stack (D-028)
         env:
           API_URL: ${{ env.VITE_SUPABASE_URL }}

@@ -9,7 +9,7 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 ## 2. Current State
 
 - Steps 1 to 6 are done: requirements, design (approved by the owner), repository setup, database, the public catalog, and the staff panel at `/admin`.
-- Step 8 is split in two pull requests. Part 1 (this one) adds the theme toggle, privacy banner with UTM capture, privacy policy and terms in three languages, FAQ drafts, back to top, scroll progress, page titles, print layout, PNG icons and web manifest, and `docs/UI-UX.md`. Part 2 is the contact form, its Edge Function and the staff messages page.
+- Step 8 is split in two pull requests. Part 1 (PR #8, CI green, not merged) adds the theme toggle, privacy banner with UTM capture, privacy policy and terms in three languages, FAQ drafts, back to top, scroll progress, page titles, print layout, PNG icons and web manifest, and `docs/UI-UX.md`. Part 2 (branch `feat/contact-form`, stacked on part 1) adds the contact form, the `contact` Edge Function (D-037) and the staff messages page; committed locally, not yet pushed.
 - Step 7, the Messenger bot, waits for the owner (D-004).
 - Public site's initial JavaScript is 131 KB of 170 KB; the staff panel and the legal pages are their own chunks.
 - Database: five migrations, 97 pgTAP assertions. Staging (`vebcdxmhoeksxnlyrmqf`, free plan, Tokyo) has all five and the sample data ([D-032](docs/DECISIONS.md#d-032-staging-migrations-applied-through-the-supabase-connector-until-step-10)).
@@ -19,6 +19,8 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 - Deferred by the owner: hosting ([D-003](docs/DECISIONS.md#d-003-hosting-deferred)) and the Messenger bot ([D-004](docs/DECISIONS.md#d-004-messenger-bot-deferred)).
 
 ## 3. Active Files
+
+- Contact (part 2): `supabase/functions/_shared/contactSchema.ts`, `supabase/functions/contact/` (`handler.ts`, `index.ts`, `deno.json`, `handler.test.ts`), `src/features/contact/ContactForm.tsx`, `src/features/admin/pages/MessagesPage.tsx`, shared `src/components/fields.tsx` and `forms.css`, `e2e/contact.spec.ts`, `e2e/live-stack.spec.ts`, CI e2e job (function settings and preflight check)
 
 - Theme: `public/theme-init.js`, `src/features/theme/`, dark tokens under `:root[data-theme='dark']` in `src/index.css`
 - Consent and UTM: `src/features/consent/` (`consent.ts`, `utm.ts`, `CookieBanner.tsx`), started in `src/main.tsx`
@@ -44,8 +46,8 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 
 ## 6. Next Steps
 
-1. Merge step 8 part 1 once CI passes and the owner agrees.
-2. Step 8 part 2: contact form (FR-29 to FR-31) with the honeypot and consented UTM values, the `contact` Edge Function (SDD 3.2) with origin check, size limit, schema validation and the rate limit, the staff messages page (FR-32), tests, and deploying the function and its secrets to staging.
+1. Merge step 8 part 1 (#8) once the owner agrees.
+2. Part 2: run `npm audit`, `build:e2e` and the full Playwright suite (only `contact.spec.ts` was rerun), push `feat/contact-form`, open the PR, and check in CI that the edge runtime answers and the live-stack contact tests pass. Then deploy `contact` to staging (verify_jwt off) with secrets `ALLOWED_ORIGINS` and a random `CONTACT_IP_SALT`.
 3. Owner: answer PRD Q10 (FAQ) and Q9 (how long to keep contact messages); find a lawyer for the privacy policy and terms; test the m.me link on Android, iPhone and desktop (D-014); check live updates on a real phone over mobile data (PRD S4).
 4. Every new migration: after CI passes, apply it to staging as in D-032, until step 10 automates it.
 5. Before the menu passes 1,000 published items, page the item reads (ARCHITECTURE 6).

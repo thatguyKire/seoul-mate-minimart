@@ -10,6 +10,7 @@
 import type { BrowserContext, Page, Request, Route, WebSocketRoute } from '@playwright/test';
 import type { Database } from '../../src/lib/database.types';
 import { fixtureCategories, fixtureItems } from '../../src/test/menuFixture';
+import { createContactHandler } from '../../supabase/functions/contact/handler.ts';
 
 type Tables = Database['public']['Tables'];
 type ItemRow = Tables['items']['Row'];
@@ -138,6 +139,29 @@ export class FakeSupabase {
   loginRateLimited = false;
   readonly requests: string[] = [];
   readonly logouts: string[] = [];
+  /** Messages stored by the contact function, newest last. */
+  readonly messages: Record<string, unknown>[] = [];
+  /** The real contact function logic, with this fake as its database (SDD 3.2). */
+  private contactHits = new Map<string, number>();
+  private contact = createContactHandler({
+    allowedOrigins: ['http://127.0.0.1:4173'],
+    ipSalt: 'e2e-salt',
+    rateLimit: (key, max) => {
+      const hits = (this.contactHits.get(key) ?? 0) + 1;
+      this.contactHits.set(key, hits);
+      return Promise.resolve(hits > max ? 600 : 0);
+    },
+    insert: (message) => {
+      this.messages.push({
+        id: newId('m'),
+        ...message,
+        utm: message.utm ?? null,
+        created_at: now(),
+      });
+      return Promise.resolve();
+    },
+    log: () => undefined,
+  });
   private sessions = new Map<string, FakeSession>();
   private refreshTokens = new Map<string, FakeSession>();
   private sockets = new Set<{ ws: WebSocketRoute; topic?: string }>();
@@ -147,7 +171,9 @@ export class FakeSupabase {
 
   static async install(target: Page | BrowserContext): Promise<FakeSupabase> {
     const fake = new FakeSupabase();
-    await target.route(/:54321\/(rest|auth|storage)\/v1\//, (route) => fake.answer(route));
+    await target.route(/:54321\/(rest|auth|storage|functions)\/v1\//, (route) =>
+      fake.answer(route),
+    );
     await target.routeWebSocket(/:54321\/realtime\/v1\/websocket/, (ws) => {
       fake.connect(ws);
     });
@@ -243,7 +269,7 @@ export class FakeSupabase {
     }
     const url = new URL(request.url());
     this.requests.push(url.pathname);
-    const [, area] = /\/(rest|auth|storage)\/v1\//.exec(url.pathname) ?? [];
+    const [, area] = /\/(rest|auth|storage|functions)\/v1\//.exec(url.pathname) ?? [];
     const reply = (status: number, json?: unknown) =>
       route.fulfill(
         json === undefined
@@ -251,6 +277,7 @@ export class FakeSupabase {
           : { status, headers: corsHeaders, json },
       );
 
+    if (area === 'functions') return this.answerFunction(request, url, route);
     if (area === 'auth') return this.answerAuth(request, url, reply);
     if (area === 'storage') return this.answerStorage(request, url, route, reply);
 
@@ -472,6 +499,11 @@ export class FakeSupabase {
 
     if (table === 'menu_state') return respond([{ version: this.version }]);
 
+    if (table === 'contact_messages') {
+      if (!admin) return reply(session ? 200 : 401, session ? [] : { code: '42501' });
+      return respond([...this.messages].reverse());
+    }
+
     if (table === 'admins') {
       const user = session ? this.users.find((u) => u.id === session.userId) : undefined;
       const own = user?.staff ? [{ user_id: user.id, require_mfa: user.requireMfa }] : [];
@@ -561,6 +593,28 @@ export class FakeSupabase {
       return respond(this.picked(targets, url) ?? targets);
     }
     return reply(405);
+  }
+
+  // ---------- Edge Functions ----------
+
+  private async answerFunction(request: Request, url: URL, route: Route) {
+    if (!url.pathname.endsWith('/functions/v1/contact')) {
+      await route.fulfill({ status: 404, headers: corsHeaders, body: '' });
+      return;
+    }
+    const body = request.method() === 'POST' ? (request.postData() ?? '') : null;
+    const response = await this.contact(
+      new globalThis.Request(url, {
+        method: request.method(),
+        headers: request.headers(),
+        ...(body === null ? {} : { body }),
+      }),
+    );
+    await route.fulfill({
+      status: response.status,
+      headers: Object.fromEntries(response.headers.entries()),
+      body: await response.text(),
+    });
   }
 
   // ---------- Storage ----------

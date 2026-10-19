@@ -34,6 +34,8 @@ All notable changes to this project are recorded here. The format follows [Keep 
 - Privacy policy and terms of use in English, Filipino and Korean, marked as awaiting legal review.
 - Frequently asked questions as drafts awaiting the store's answers; a production build fails while any draft remains.
 - Back to top button, a scroll progress bar on the menu and legal pages, page titles, a print layout for the menu, PNG icons, an Apple touch icon and a web manifest.
+- Contact form for visitors without Messenger, with inline errors, a summary and a thank-you message; the `contact` Edge Function checks origin, size and fields, drops bots through a hidden field, and allows 5 messages per address per 10 minutes.
+- Staff messages page: contact form messages, newest first, with tap-to-call and email links.
 
 ### Changed
 

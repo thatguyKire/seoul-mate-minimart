@@ -16,6 +16,7 @@ export type ItemInsert = Tables['items']['Insert'];
 export type ItemUpdate = Tables['items']['Update'];
 export type CategoryInsert = Tables['categories']['Insert'];
 export type CategoryUpdate = Tables['categories']['Update'];
+export type ContactMessage = Tables['contact_messages']['Row'];
 
 interface Response<T> {
   data: T | null;
@@ -51,6 +52,17 @@ export async function loadCatalog(client: AdminClient) {
     client.from('items').select('*').order('sort_order').order('name_en'),
   ]);
   return { categories: unwrap(categories), items: unwrap(items) };
+}
+
+/** Contact form messages, newest first (FR-32). RLS lets only staff read them. */
+export async function loadMessages(client: AdminClient): Promise<ContactMessage[]> {
+  return unwrap(
+    await client
+      .from('contact_messages')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(200),
+  );
 }
 
 export async function loadItem(client: AdminClient, id: string): Promise<AdminItem | null> {

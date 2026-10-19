@@ -9,6 +9,7 @@ import { App } from './App';
 import { startConsent } from './features/consent/consent';
 import { watchSystemTheme } from './features/theme/theme';
 import './index.css';
+import './components/forms.css';
 import './components/layout.css';
 import './features/home/home.css';
 import './features/catalog/catalog.css';

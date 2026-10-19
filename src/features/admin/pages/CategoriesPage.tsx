@@ -9,7 +9,7 @@ import {
   type AdminCategory,
 } from '../adminData';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { BusyButton, ErrorSummary, FailureMessage, TextField } from '../components/fields';
+import { BusyButton, ErrorSummary, FailureMessage, TextField } from '../../../components/fields';
 import { asAdminError, type FailureKind } from '../errors';
 import {
   categoryFieldMax,

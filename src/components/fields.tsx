@@ -1,6 +1,6 @@
-// Form building blocks for the staff panel (FR-45): a visible label, an optional hint, an
-// inline error tied to the field with aria-describedby, and an error summary that links to
-// each field.
+// Form building blocks for the contact form and the staff panel (FR-30, FR-45): a visible
+// label, an optional hint, an inline error tied to the field with aria-describedby, and an
+// error summary that links to each field.
 import {
   useEffect,
   useRef,
@@ -11,8 +11,7 @@ import {
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Icon } from '../../../components/Icon';
+import { Icon } from './Icon';
 
 interface FieldFrameProps {
   id: string;
@@ -149,9 +148,10 @@ export function PasswordField({
   id,
   label,
   error,
+  toggleLabel,
   ...input
-}: Omit<FieldFrameProps, 'hint'> & Omit<InputHTMLAttributes<HTMLInputElement>, 'id' | 'type'>) {
-  const { t } = useTranslation('admin');
+}: Omit<FieldFrameProps, 'hint'> &
+  Omit<InputHTMLAttributes<HTMLInputElement>, 'id' | 'type'> & { toggleLabel: string }) {
   const [shown, setShown] = useState(false);
   return (
     <FieldFrame id={id} label={label} error={error}>
@@ -173,7 +173,7 @@ export function PasswordField({
             setShown((value) => !value);
           }}
         >
-          {t('login.showPassword')}
+          {toggleLabel}
         </button>
       </div>
     </FieldFrame>

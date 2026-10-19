@@ -378,6 +378,14 @@ authorization_url_path = "/oauth/consent"
 # Allow dynamic client registration
 allow_dynamic_registration = false
 
+# The contact form's function is called by visitors' browsers without a login. It checks the
+# origin, size, schema and rate limit itself (SDD 3.2); its settings are in
+# supabase/functions/.env locally and in Edge Function secrets on Supabase.
+[functions.contact]
+enabled = true
+verify_jwt = false
+import_map = "./functions/contact/deno.json"
+
 [edge_runtime]
 enabled = true
 # Supported request policies: `oneshot`, `per_worker`.

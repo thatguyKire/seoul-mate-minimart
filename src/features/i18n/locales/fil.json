@@ -109,5 +109,25 @@
     "updated": "Huling na-update:",
     "review": "Hinihintay pa ng page na ito ang pagsusuri ng isang abogado.",
     "englishPrevails": "Kung magkaiba ang mga bersyong English, Filipino at Korean, ang bersyong English ang masusunod."
+  },
+  "contactForm": {
+    "title": "Magpadala ng mensahe",
+    "intro": "Wala sa Messenger? Mag-iwan ng mensahe at sasagot kami sa telepono o email sa oras ng tindahan.",
+    "name": "Ang iyong pangalan",
+    "contact": "Mobile number o email",
+    "contactHint": "Halimbawa: 0917 123 4567 o name@example.com",
+    "message": "Mensahe",
+    "send": "Ipadala ang mensahe",
+    "sending": "Ipinapadala",
+    "errorSummary": "Pakitingnan ang mga ito at ipadala ulit",
+    "errors": {
+      "name": "Ilagay ang iyong pangalan, hanggang 80 character",
+      "contact": "Maglagay ng mobile number gaya ng 0917 123 4567, o email address",
+      "message": "Sumulat ng mensahe na hanggang 1,000 character"
+    },
+    "rateLimited": "Masyadong maraming mensahe. Pakisubukan ulit pagkalipas ng ilang minuto.",
+    "server": "Hindi naipadala ang iyong mensahe.",
+    "sent": "Salamat, {{name}}. Natanggap namin ang mensahe mo at sasagot kami sa oras ng tindahan.",
+    "privacy": "Ginagamit lang namin ang iyong detalye para sumagot sa iyo."
   }
 }
