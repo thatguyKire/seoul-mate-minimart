@@ -154,7 +154,10 @@ test.describe('search (FR-12 to FR-15)', () => {
     });
     await page.goto('/en/');
     await expect(card(page, 'Shin Ramyun')).toBeVisible();
-    const requestsBefore = fake.requests.length;
+    // Background version checks may run at any time; menu reads would mean search went to the server.
+    const menuReads = () =>
+      fake.requests.filter((path) => /\/rest\/v1\/(items|categories)$/.test(path)).length;
+    const readsBefore = menuReads();
     const search = page.getByRole('searchbox');
 
     for (const attack of [
@@ -170,7 +173,7 @@ test.describe('search (FR-12 to FR-15)', () => {
     await expect(page.locator('main script')).toHaveCount(0);
     expect(dialogs).toBe(0);
     // Search never reaches the server (D-017).
-    expect(fake.requests.length).toBe(requestsBefore);
+    expect(menuReads()).toBe(readsBefore);
     await expect(page.getByRole('link', { name: 'Ask on Messenger' })).toHaveAttribute(
       'href',
       'https://m.me/61594474910928',

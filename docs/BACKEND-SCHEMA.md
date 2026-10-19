@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Status | 1.0, approved by the owner on 2026-10-18 |
-| Last updated | 2026-10-18 |
+| Last updated | 2026-10-19 |
 
 This document owns the **database**: tables, columns, indexes, Row Level Security policies, functions, scheduled jobs and storage rules. The database is Postgres on Supabase. Every change is made through a migration file in `supabase/migrations` (from step 4). How the frontend and functions use this data is in [SDD.md](SDD.md).
 
@@ -41,6 +41,7 @@ erDiagram
     text description_ko
     int price_centavos
     text photo_path
+    text photo_format
     boolean is_published
     boolean is_available
     boolean is_sample
@@ -115,6 +116,7 @@ All tables live in the `public` schema. Times are `timestamptz`, stored in UTC a
 | `description_fil`, `description_ko` | `text` | Optional, up to 500 characters |
 | `price_centavos` | `int` | Required, 0 to 10,000,000 (up to ₱100,000). Whole centavos avoid rounding errors |
 | `photo_path` | `text` | Optional. Matches `^items/[0-9a-f-]{36}/[0-9]+$`, the folder prefix of the stored photo sizes ([section 6](#6-storage)) |
+| `photo_format` | `text` | `webp` or `jpg`, the format of those files ([D-034](DECISIONS.md#d-034-an-items-photo-format-is-stored-with-it)). Set exactly when `photo_path` is set |
 | `is_published` | `boolean` | Default `false`, so half-finished items stay hidden |
 | `is_available` | `boolean` | Default `true` |
 | `is_sample` | `boolean` | Default `false`. `true` only in seed data ([D-010](DECISIONS.md#d-010-sample-products-until-the-real-list-arrives)) |
@@ -203,7 +205,7 @@ Every table has RLS enabled. With no matching policy, a role gets nothing (NFR-S
 | `rate_limits` | all | none | Only server functions (service role) |
 | `messenger_contacts` | all | none | Only the webhook function (service role) |
 
-Column privileges: `anon` can select only these `items` columns: `id`, `category_id`, the `name_*` and `description_*` columns, `price_centavos`, `photo_path`, `is_available`, `is_sample`, `sort_order` and `availability_changed_at`. `updated_by` and the timestamps used for auditing stay hidden from visitors.
+Column privileges: `anon` can select only these `items` columns: `id`, `category_id`, the `name_*` and `description_*` columns, `price_centavos`, `photo_path`, `photo_format`, `is_available`, `is_sample`, `sort_order` and `availability_changed_at`. `updated_by` and the timestamps used for auditing stay hidden from visitors.
 
 ## 4. Functions, triggers and jobs
 
@@ -304,4 +306,4 @@ Used only in local and staging databases ([TRD 3](TRD.md#3-environments)), never
 | `03_signed_in_non_staff.test.sql` | A signed-in user who is not staff changes nothing and sees nothing private |
 | `04_staff_access.test.sql` | Staff can edit; one menu version bump per bulk change; audit fields cannot be faked; new items start hidden; the two-factor rule; photo path rule |
 | `05_rate_limit.test.sql` | Fixed windows, separate keys, retry time, invalid arguments |
-| `06_constraints.test.sql` | Length, format, price range, photo path, UTM keys, single-row menu version, category deletion |
+| `06_constraints.test.sql` | Length, format, price range, photo path and format, UTM keys, single-row menu version, category deletion |

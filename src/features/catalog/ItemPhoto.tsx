@@ -5,15 +5,15 @@ import { env } from '../../lib/env';
 import { isPhotoPath, photoSrcSet, photoUrl, type PhotoFormat } from './photos';
 
 /**
- * The item's photo, or a neutral "Photo coming soon" placeholder (FR-03). Tries WebP, then
- * JPEG, then shows the placeholder if neither exists (E15). The parent keys this on the
- * photo path, so a new photo starts again from WebP.
+ * The item's photo, or a neutral "Photo coming soon" placeholder (FR-03), also used when
+ * the photo cannot be loaded (E15). The parent keys this on the photo path, so a new photo
+ * gets a fresh attempt.
  */
-export function ItemPhoto({ path }: { path: string | null }) {
+export function ItemPhoto({ path, format }: { path: string | null; format: PhotoFormat | null }) {
   const { t } = useTranslation();
-  const [format, setFormat] = useState<PhotoFormat | 'none'>('webp');
+  const [failed, setFailed] = useState(false);
 
-  if (!isPhotoPath(path) || format === 'none' || !env.supabaseUrl) {
+  if (!isPhotoPath(path) || !format || failed || !env.supabaseUrl) {
     return (
       <div className="item-photo item-photo--placeholder">
         <Icon name="bag" />
@@ -35,7 +35,7 @@ export function ItemPhoto({ path }: { path: string | null }) {
       loading="lazy"
       decoding="async"
       onError={() => {
-        setFormat((current) => (current === 'webp' ? 'jpg' : 'none'));
+        setFailed(true);
       }}
     />
   );

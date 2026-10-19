@@ -75,6 +75,12 @@ jobs:
     name: End-to-end tests
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    # Logins for the throwaway local stack only, created by scripts/create-local-staff.mjs.
+    env:
+      E2E_STAFF_EMAIL: staff@example.test
+      E2E_STAFF_PASSWORD: Ci-Staff-Login-1
+      E2E_NOT_STAFF_EMAIL: visitor@example.test
+      E2E_NOT_STAFF_PASSWORD: Ci-Visitor-Login-1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -107,6 +113,13 @@ jobs:
             echo "E2E_SERVICE_ROLE_KEY=$service_key"
             echo "E2E_LIVE_SUPABASE=1"
           } >> "$GITHUB_ENV"
+      - name: Create a staff login and a non-staff login on the local stack (D-028)
+        env:
+          API_URL: ${{ env.VITE_SUPABASE_URL }}
+          SERVICE_ROLE_KEY: ${{ env.E2E_SERVICE_ROLE_KEY }}
+        run: |
+          node scripts/create-local-staff.mjs "$E2E_STAFF_EMAIL" "$E2E_STAFF_PASSWORD"
+          node scripts/create-local-staff.mjs "$E2E_NOT_STAFF_EMAIL" "$E2E_NOT_STAFF_PASSWORD" --not-staff
       - run: npm run build:e2e
       - run: npm run test:e2e
       - name: Upload test report
