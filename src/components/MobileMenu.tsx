@@ -1,6 +1,7 @@
 import { useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageLinks } from '../features/i18n/LanguageLinks';
+import { ThemeToggle } from '../features/theme/ThemeToggle';
 import { Icon } from './Icon';
 import { sections, useSectionHref } from './sections';
 
@@ -64,6 +65,8 @@ export function MobileMenu() {
         </nav>
         <h3 className="mobile-menu__subtitle">{t('language.heading')}</h3>
         <LanguageLinks onSelect={close} />
+        <h3 className="mobile-menu__subtitle">{t('theme.heading')}</h3>
+        <ThemeToggle />
       </dialog>
     </>
   );

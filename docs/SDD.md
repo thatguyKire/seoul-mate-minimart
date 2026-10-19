@@ -48,12 +48,11 @@ flowchart LR
   App --> Public["PublicLayout, under /:locale: SkipLink, i18n instance for the locale"]
   App --> AdminApp["AdminApp, under /admin, lazy-loaded"]
   Public --> Header["Header: Nav, LanguageSwitcher, ThemeToggle, MobileMenu"]
-  Public --> Progress["ScrollProgress"]
+  Public --> Progress["ScrollProgress, on the home and legal pages"]
   Public --> Home["HomePage"]
-  Public --> Legal["PrivacyPage, TermsPage, NotFoundPage"]
-  Public --> Footer["Footer: legal links, Cookie settings"]
-  Public --> Floating["FloatingStack: ContactButton, BackToTop"]
-  Public --> Banner["CookieBanner"]
+  Public --> Legal["LegalPage: privacy and terms; NotFoundPage"]
+  Public --> Footer["Footer: legal links, Privacy choices"]
+  Public --> Floating["FloatingStack: BackToTop, ContactButton, CookieBanner"]
   Home --> Hero["Hero: what we sell, where, how to order"]
   Home --> MenuSection["MenuSection"]
   MenuSection --> Search["SearchBox"]
@@ -63,7 +62,7 @@ flowchart LR
   Grid --> Card["ItemCard with ItemPhoto, or SkeletonCard"]
   Home --> HowTo["HowToOrder"]
   Home --> Info["StoreInfo: Hours, Address, Phone, CopyButton"]
-  Home --> Faq["FaqAccordion"]
+  Home --> Faq["FaqSection"]
   Home --> Contact["ContactForm"]
   AdminApp --> Guard["AuthProvider: staff check, two-factor level, idle and maximum-age logout"]
   Guard --> Login["LoginPage: PasswordField with toggle"]
@@ -86,10 +85,10 @@ flowchart LR
 | i18n | Routes under `/:locale`; any other first segment goes back to the root. The root route picks a language from the saved choice, then `navigator.languages` (`tl` counts as Filipino), then English, keeping the query string. Only an explicit choice in the language menu is saved, so opening someone's shared link in another language does not change the visitor's default. One i18next instance per language, chosen by the route, so a switch re-renders the page in one step without a reload. Sets `<html lang>` before paint, formats prices and times with `Intl` ([TRD 5](TRD.md#5-localization)). Fallback text gets its own `lang` attribute. Translation keys are type-checked, and a unit test keeps the three languages' keys identical | FR-16 to FR-21, NFR-ACC-05 |
 | store-info | Reads store facts from `config/store.ts`. Hours are stored per day as opening and closing times; a closing time at or before the opening time means the next day. Copy buttons use the Clipboard API, falling back to selecting the text with a hint to copy it where the API is blocked. Announces "Copied" through a live region. "How to order" is a three-step list with a Messenger button | FR-22 to FR-26 |
 | contact | Floating button and all contact links use the Messenger link from store facts. The contact form validates with the shared schema for instant feedback, then posts to the `contact` function, which validates again ([section 3.2](#32-contact-function)) | FR-27 to FR-31, NFR-SEC-17 |
-| faq | Questions and answers are per-language content files. A build step fails a production build while any entry is marked TODO | FR-33 |
-| consent | Cookie banner, stored choice, footer "Cookie settings". Loads the analytics script only after Accept, and never under `/admin`. Captures UTM values as described in [section 7.3](#73-cookie-consent-analytics-and-utm) | FR-54 to FR-57, NFR-PRIV-04 |
-| legal | Privacy and terms pages from structured per-language content (headings, paragraphs, lists) rendered as React elements, never as raw HTML. Each shows its last updated date and the "English version prevails" note ([D-009](DECISIONS.md#d-009-legal-pages-in-three-languages-english-prevails)) | FR-58, FR-59 |
-| layout | Sticky header with `scroll-padding-top` so anchored headings are never hidden. Mobile menu as a dialog with focus trap. Skip link, scroll progress bar, back to top. One `FloatingStack` container positions the contact button, back to top and cookie banner, so they cannot overlap. `theme-init.js` sets the theme before first paint. A print stylesheet hides everything but the menu | FR-60 to FR-69, NFR-ACC-04, NFR-ACC-07 |
+| faq | Questions and answers are per-language JSON files (`src/features/faq/faq.<locale>.json`), shown as native `<details>` elements. Entries marked `todo` show a "Draft" tag outside production, and a Vite plugin fails any build with `VITE_APP_ENV=production` while one remains | FR-33 |
+| consent | Privacy banner in the floating stack, stored choice (kept in memory when storage is blocked), footer "Privacy choices" to change it. Captures the five UTM values at start-up, keeps them in memory until Accept, then in `sessionStorage`; Decline discards them ([section 7.3](#73-cookie-consent-analytics-and-utm)). No analytics provider is chosen yet ([D-036](DECISIONS.md#d-036-the-privacy-banner-comes-before-any-analytics)); when one is, it loads only after Accept, and never under `/admin` | FR-54 to FR-57, NFR-PRIV-04 |
+| legal | Privacy and terms pages from structured per-language content (headings, paragraphs, lists) rendered as React elements, never as raw HTML. Each shows its last updated date, a note that it awaits legal review, and the "English version prevails" note ([D-009](DECISIONS.md#d-009-legal-pages-in-three-languages-english-prevails)). Routes `/:locale/privacy` and `/:locale/terms`; store facts are filled in from `config/store.ts` | FR-58, FR-59 |
+| layout | Sticky header with `scroll-padding-top` so anchored headings are never hidden. Mobile menu as a dialog with focus trap. Skip link, scroll progress bar, back to top. One `FloatingStack` column holds back to top, the contact button and the privacy banner, so they cannot overlap; its height is published as `--floating-space` for `scroll-padding-bottom` and the footer's bottom padding. `theme-init.js` sets `data-theme` on `<html>` before first paint from the saved choice or the system setting, and the app follows system changes until the visitor chooses. Tab titles name each page. A print stylesheet keeps item names, prices and stock only. Icons: SVG favicon, 32px PNG, Apple touch icon and web manifest, rendered by `scripts/generate-icons.mjs` | FR-60 to FR-69, NFR-ACC-04, NFR-ACC-07 |
 
 ### 2.3 Admin panel modules
 

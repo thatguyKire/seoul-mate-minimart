@@ -1,0 +1,14 @@
+{
+  "name": "Seoul-Mate Minimart",
+  "short_name": "Seoul-Mate",
+  "description": "Korean snacks and drinks, beauty and skincare, instant noodles and household essentials in Masbate City.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#e8508a",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" },
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

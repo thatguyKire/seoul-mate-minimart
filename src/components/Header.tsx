@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { store } from '../config/store';
 import { LanguageSwitcher } from '../features/i18n/LanguageSwitcher';
 import { useLocale } from '../features/i18n/localeContext';
+import { ThemeToggle } from '../features/theme/ThemeToggle';
 import { MobileMenu } from './MobileMenu';
 import { sections, useSectionHref } from './sections';
 
@@ -35,6 +36,7 @@ export function Header() {
         </nav>
         <div className="site-header__language">
           <LanguageSwitcher />
+          <ThemeToggle className="theme-toggle theme-toggle--compact" />
         </div>
         <MobileMenu />
       </div>

@@ -1,13 +1,17 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../../components/Icon';
+import { ScrollProgress } from '../../components/ScrollProgress';
+import { usePageTitle } from '../../components/usePageTitle';
 import { store } from '../../config/store';
 import { MenuSection } from '../catalog/MenuSection';
+import { FaqSection } from '../faq/FaqSection';
 import { HowToOrder } from '../store-info/HowToOrder';
 import { StoreInfo } from '../store-info/StoreInfo';
 
 export function HomePage() {
   const { t } = useTranslation();
+  usePageTitle();
 
   // A link such as /en/#visit arrives before the page exists, so scroll once it does.
   useEffect(() => {
@@ -17,6 +21,7 @@ export function HomePage() {
 
   return (
     <>
+      <ScrollProgress />
       {/* The hero says what the store sells, where it is, and how to order (BRIEF 5). */}
       <section className="hero" aria-labelledby="hero-title">
         <div className="container hero__inner">
@@ -43,6 +48,7 @@ export function HomePage() {
       </section>
       <MenuSection />
       <HowToOrder />
+      <FaqSection />
       <StoreInfo />
     </>
   );

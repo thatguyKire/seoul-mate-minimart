@@ -13,6 +13,13 @@ const AdminApp = lazy(() =>
   import('./features/admin/AdminApp').catch(() => ({ default: NewVersionPage })),
 );
 
+// The legal pages carry long texts in three languages; only visitors who open them load them.
+const LegalPage = lazy(() =>
+  import('./features/legal/LegalPage')
+    .then((module) => ({ default: module.LegalPage }))
+    .catch(() => ({ default: NewVersionPage })),
+);
+
 /** Routes. The router itself is set up in main.tsx, so tests can use a memory router. */
 export function App() {
   return (
@@ -29,6 +36,22 @@ export function App() {
         />
         <Route path=":locale" element={<LocaleRoute />}>
           <Route index element={<HomePage />} />
+          <Route
+            path="privacy"
+            element={
+              <Suspense fallback={null}>
+                <LegalPage kind="privacy" />
+              </Suspense>
+            }
+          />
+          <Route
+            path="terms"
+            element={
+              <Suspense fallback={null}>
+                <LegalPage kind="terms" />
+              </Suspense>
+            }
+          />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

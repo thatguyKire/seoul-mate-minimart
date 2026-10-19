@@ -7,7 +7,8 @@
     "visit": "Bisitahin kami",
     "openMenu": "Buksan ang menu",
     "closeMenu": "Isara ang menu",
-    "mobileMenuTitle": "Menu ng site"
+    "mobileMenuTitle": "Menu ng site",
+    "faq": "FAQ"
   },
   "language": {
     "current": "Wika: {{name}}",
@@ -76,11 +77,37 @@
   },
   "footer": {
     "tagline": "Ang one stop shop mo para sa Korean goodies at pang-araw-araw na pangangailangan.",
-    "facebook": "Seoul-Mate Minimart sa Facebook"
+    "facebook": "Seoul-Mate Minimart sa Facebook",
+    "privacy": "Patakaran sa privacy",
+    "terms": "Mga tuntunin sa paggamit",
+    "privacyChoices": "Mga pagpili sa privacy"
   },
   "notFound": {
     "title": "Hindi nahanap ang page",
     "body": "Walang ganitong page. Nasa home page ang menu.",
     "home": "Pumunta sa menu"
+  },
+  "theme": {
+    "dark": "Madilim na tema",
+    "heading": "Tema"
+  },
+  "floating": {
+    "backToTop": "Bumalik sa itaas"
+  },
+  "consent": {
+    "title": "Ang iyong privacy",
+    "text": "Puwede ba naming itala kung paano mo kami nahanap, gaya ng Facebook post na pinanggalingan mo, at bilangin ang mga bisita? Walang ise-save kung hindi ka papayag.",
+    "policy": "Patakaran sa privacy",
+    "accept": "Tanggapin",
+    "decline": "Tanggihan"
+  },
+  "faq": {
+    "title": "Mga madalas itanong",
+    "draft": "Draft"
+  },
+  "legal": {
+    "updated": "Huling na-update:",
+    "review": "Hinihintay pa ng page na ito ang pagsusuri ng isang abogado.",
+    "englishPrevails": "Kung magkaiba ang mga bersyong English, Filipino at Korean, ang bersyong English ang masusunod."
   }
 }
