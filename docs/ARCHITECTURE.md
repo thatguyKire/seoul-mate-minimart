@@ -97,7 +97,7 @@ flowchart TB
 |---|---|
 | Host settings | Public values only: Supabase URL, anon key, Sentry DSN |
 | GitHub Actions secrets | Supabase access token and database passwords for migrations, Sentry auth token for source maps |
-| Edge Function secrets | Salt for hashing IP addresses; later, the Meta app secret, verify token and Page token. The service role key is provided by Supabase |
+| Edge Function secrets | `CONTACT_IP_SALT` (salt for hashing IP addresses) and `ALLOWED_ORIGINS` (the site's exact origins); later, the Meta app secret, verify token and Page token. The service role key is provided by Supabase |
 
 ## 4. Hosting
 

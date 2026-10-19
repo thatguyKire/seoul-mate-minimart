@@ -109,6 +109,21 @@ export interface Database {
         Update: never;
         Relationships: [];
       };
+      contact_messages: {
+        Row: {
+          id: string;
+          name: string;
+          contact: string;
+          message: string;
+          locale: 'en' | 'fil' | 'ko';
+          utm: Record<string, string> | null;
+          created_at: string;
+        };
+        // Written only by the contact Edge Function with the service role.
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       menu_state: {
         Row: {
           id: number;

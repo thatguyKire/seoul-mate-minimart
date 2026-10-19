@@ -378,6 +378,10 @@ Tests are filled in during steps 4 to 9. Each range is split into one row per re
 | FR-26 | [2.2](SDD.md#22-public-site-modules) store-info | `App.test.tsx` |
 | FR-27 | [2.2](SDD.md#22-public-site-modules) contact | `App.test.tsx`; `layout.spec.ts` |
 | FR-28 | [2.2](SDD.md#22-public-site-modules) contact | `App.test.tsx`; `catalog.spec.ts`; `layout.spec.ts` |
+| FR-29 | [2.2](SDD.md#22-public-site-modules) contact, [3.2](SDD.md#32-contact-function) | `contact.spec.ts` (send, with and without consent); `live-stack.spec.ts` (real function, CI) |
+| FR-30 | [2.2](SDD.md#22-public-site-modules) contact, [3.2](SDD.md#32-contact-function) | `handler.test.ts` (server checks); `contact.spec.ts` (inline errors, error summary, axe) |
+| FR-31 | [2.2](SDD.md#22-public-site-modules) contact | `contact.spec.ts` (thank-you replaces the form and takes focus) |
+| FR-32 | [2.3](SDD.md#23-admin-panel-modules) messages | `contact.spec.ts` (newest first, as plain text, tap to call); `live-stack.spec.ts` (staff read a real message, CI); `03_signed_in_non_staff.test.sql` (others cannot) |
 | FR-60 | [2.2](SDD.md#22-public-site-modules) layout | `layout.spec.ts` (anchored heading below the sticky header) |
 | FR-61 | [2.2](SDD.md#22-public-site-modules) layout | `layout.spec.ts` (focus stays inside, Escape closes); `languages.spec.ts` (link tap closes) |
 | FR-62 | [2.2](SDD.md#22-public-site-modules) layout | `layout.spec.ts` |
@@ -416,10 +420,9 @@ Manual screen reader checks for FR-60 to FR-62 are still to do (step 11).
 
 | Requirements | Area | SDD section | Verified by (planned) |
 |---|---|---|---|
-| FR-29 to FR-32 | Contact form | [2.2](SDD.md#22-public-site-modules) contact, [2.4](SDD.md#24-server-functions), [3.2](SDD.md#32-contact-function) | End-to-end tests; server function tests |
 | FR-48 to FR-53 | Messenger bot (Deferred) | [2.4](SDD.md#24-server-functions), [2.5](SDD.md#25-reply-engine-deferred), [3.3](SDD.md#33-messenger-webhook-deferred), [7.4](SDD.md#74-messenger-message-deferred), [7.5](SDD.md#75-bot-reply-logic-deferred) | Server function tests; reply engine unit tests |
 | NFR-SEC-01 to NFR-SEC-03 | Database access | [5.3](SDD.md#53-database-access) | `supabase/tests/database` files 01 to 04 (pgTAP), run in CI ([BACKEND-SCHEMA 8](BACKEND-SCHEMA.md#8-tests)) |
-| NFR-SEC-04 to NFR-SEC-18 | Other security | [5.2](SDD.md#52-threat-model-stride) and [5.4 to 5.9](SDD.md#54-staff-sessions) | Lint rules, CI dependency audit, bundle secret scan, header checks, injection tests. NFR-SEC-13 by design (D-022). NFR-SEC-14 in `04_staff_access.test.sql` and `live-stack.spec.ts`. NFR-SEC-16 for login: Supabase Auth, `429` without `Retry-After` (D-033) |
+| NFR-SEC-04 to NFR-SEC-18 | Other security | [5.2](SDD.md#52-threat-model-stride) and [5.4 to 5.9](SDD.md#54-staff-sessions) | Lint rules, CI dependency audit, bundle secret scan, header checks, injection tests. NFR-SEC-13 by design (D-022). NFR-SEC-09, -12, -16 and -17 for the contact function in `handler.test.ts` and `live-stack.spec.ts`. NFR-SEC-14 in `04_staff_access.test.sql` and `live-stack.spec.ts`. NFR-SEC-16 for login: Supabase Auth, `429` without `Retry-After` (D-033) |
 | NFR-PERF-01 to NFR-PERF-06 | Performance | [2.1](SDD.md#21-frontend-structure); ARCHITECTURE [5](ARCHITECTURE.md#5-caching) and [6](ARCHITECTURE.md#6-scaling) | Lighthouse CI (planned); bundle size check in CI, `check-bundle.mjs` (NFR-PERF-02); search benchmark in `searchIndex.test.ts` (NFR-PERF-05) |
 | NFR-ACC-01 to NFR-ACC-07 | Accessibility | [2.2](SDD.md#22-public-site-modules) layout and i18n; [UI-UX.md](UI-UX.md) | axe checks in `layout.spec.ts`, `site.spec.ts` and `admin.spec.ts` (English and Korean, light and dark, phone and desktop); fallback `lang` in `App.test.tsx` (NFR-ACC-05); manual audit |
 | NFR-PRIV-01 to NFR-PRIV-05 | Privacy | [5.7](SDD.md#57-secrets), [6](SDD.md#6-error-handling-and-logging), [7.3](SDD.md#73-cookie-consent-analytics-and-utm) | Hosts contacted before consent in `layout.spec.ts` (NFR-PRIV-02); storage before consent in `consent.test.ts` and `site.spec.ts` (NFR-PRIV-04); Sentry scrubbing test; legal review |

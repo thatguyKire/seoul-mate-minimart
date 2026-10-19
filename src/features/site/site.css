@@ -273,3 +273,58 @@
 .site-footer__button:focus-visible {
   text-decoration-thickness: 2px;
 }
+
+/* Contact form (FR-29 to FR-31). */
+.contact {
+  border-top: 1px solid var(--color-border);
+}
+
+.contact h2 {
+  margin-bottom: 0.75rem;
+}
+
+.contact__intro {
+  max-width: 40rem;
+  margin-bottom: 1.25rem;
+  color: var(--color-text-muted);
+}
+
+.contact__form {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 32rem;
+}
+
+.contact__privacy {
+  color: var(--color-text-muted);
+  font-size: var(--step--1);
+}
+
+.contact__form .button--primary {
+  justify-self: start;
+}
+
+/* The honeypot field: off screen and out of the accessibility tree (NFR-SEC-17). */
+.contact__trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.contact__thanks {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-width: 40rem;
+  padding: 1rem 1.25rem;
+  border-left: 4px solid var(--pink-500);
+  background: var(--color-tint);
+  font-size: var(--step-1);
+  font-weight: 700;
+}
+
+.contact__thanks:focus {
+  outline: none;
+}

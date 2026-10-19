@@ -44,6 +44,11 @@ export function AdminLayout({
                 </NavLink>
               </li>
               <li>
+                <NavLink to="/admin/messages" className="admin-nav__link">
+                  {t('nav.messages')}
+                </NavLink>
+              </li>
+              <li>
                 <NavLink to="/admin/security" className="admin-nav__link">
                   {t('nav.security')}
                 </NavLink>

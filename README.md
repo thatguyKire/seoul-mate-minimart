@@ -15,7 +15,7 @@ Website for **Seoul-Mate Minimart**, *your one stop shop* for Korean goodies and
 
 ## Project status
 
-Steps 1 to 6 of 11 are done: requirements, design, repository setup, database, the public menu (live availability, search, English, Filipino and Korean, store information) and the staff panel at `/admin`. Step 8 is under way: the theme toggle, privacy banner, privacy policy and terms, FAQ, print layout and icons are in; the contact form comes next. Step 7, the Messenger bot, waits for the owner. The menu shows sample products until the real list arrives. Progress and next steps are in [HANDOFF.md](HANDOFF.md).
+Steps 1 to 6 of 11 are done: requirements, design, repository setup, database, the public menu (live availability, search, English, Filipino and Korean, store information) and the staff panel at `/admin`. Step 8 is done: theme toggle, privacy banner, privacy policy and terms, FAQ, print layout, icons, and the contact form with its Edge Function and the staff messages page. Step 7, the Messenger bot, waits for the owner. The menu shows sample products until the real list arrives. Progress and next steps are in [HANDOFF.md](HANDOFF.md).
 
 ## Local setup
 
@@ -37,6 +37,8 @@ Listed in [`.env.example`](.env.example). Every `VITE_` variable is built into t
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon (publishable) key, safe only because of RLS |
 | `VITE_SENTRY_DSN` | Browser error reports; empty turns them off |
 | `VITE_APP_ENV` | `local`, `staging` or `production`; sample products are labeled outside production |
+
+The `contact` Edge Function reads `ALLOWED_ORIGINS` (comma-separated exact origins, such as `http://localhost:5173`) and `CONTACT_IP_SALT` (a long random string) from Edge Function secrets, or locally from `supabase/functions/.env`, which git ignores.
 
 Server secrets never go in `.env` files for the frontend. Where they live is in [docs/ARCHITECTURE.md, section 3](docs/ARCHITECTURE.md#3-deployment).
 

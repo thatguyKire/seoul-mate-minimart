@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BusyButton } from './fields';
+import { BusyButton } from '../../../components/fields';
 
 interface ConfirmModalProps {
   open: boolean;

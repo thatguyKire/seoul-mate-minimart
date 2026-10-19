@@ -10,7 +10,14 @@ const rawHtmlMessage =
   'Raw HTML is banned (NFR-SEC-10). Render text as React elements so it is escaped.';
 
 export default defineConfig([
-  globalIgnores(['dist', 'coverage', 'playwright-report', 'test-results']),
+  // Deno entry points use Deno globals and npm: imports; their logic lives in linted files.
+  globalIgnores([
+    'dist',
+    'coverage',
+    'playwright-report',
+    'test-results',
+    'supabase/functions/*/index.ts',
+  ]),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

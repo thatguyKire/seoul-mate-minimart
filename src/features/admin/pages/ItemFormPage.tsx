@@ -17,7 +17,7 @@ import {
   SelectField,
   TextAreaField,
   TextField,
-} from '../components/fields';
+} from '../../../components/fields';
 import { asAdminError, type FailureKind } from '../errors';
 import { PhotoField } from '../photos/PhotoField';
 import {
