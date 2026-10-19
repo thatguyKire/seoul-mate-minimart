@@ -109,5 +109,25 @@
     "updated": "Last updated:",
     "review": "This page is awaiting review by a lawyer.",
     "englishPrevails": "If the English, Filipino and Korean versions differ, the English version prevails."
+  },
+  "contactForm": {
+    "title": "Send us a message",
+    "intro": "Not on Messenger? Leave a message and we'll reply by phone or email during store hours.",
+    "name": "Your name",
+    "contact": "Mobile number or email",
+    "contactHint": "For example 0917 123 4567 or name@example.com",
+    "message": "Message",
+    "send": "Send message",
+    "sending": "Sending",
+    "errorSummary": "Check these and send again",
+    "errors": {
+      "name": "Enter your name, up to 80 characters",
+      "contact": "Enter a mobile number such as 0917 123 4567, or an email address",
+      "message": "Write a message of up to 1,000 characters"
+    },
+    "rateLimited": "Too many messages. Please try again in a few minutes.",
+    "server": "We couldn't send your message.",
+    "sent": "Thanks, {{name}}. We got your message and will reply during store hours.",
+    "privacy": "We use your details only to reply to you."
   }
 }

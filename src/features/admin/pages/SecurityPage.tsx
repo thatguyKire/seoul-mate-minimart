@@ -1,7 +1,7 @@
 import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { BusyButton, FailureMessage, TextField } from '../components/fields';
+import { BusyButton, FailureMessage, TextField } from '../../../components/fields';
 import { useAuth } from '../session/authContext';
 
 interface Enrollment {

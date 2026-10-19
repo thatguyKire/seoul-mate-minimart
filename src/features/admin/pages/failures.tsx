@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { FailureMessage } from '../components/fields';
+import { FailureMessage } from '../../../components/fields';
 import type { FailureKind } from '../errors';
 
 /** Plain words for a failed action (SDD 6). Kinds with their own wording are handled by the page. */

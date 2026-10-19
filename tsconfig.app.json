@@ -13,6 +13,7 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
 
     "strict": true,
     "noUncheckedIndexedAccess": true,
@@ -23,5 +24,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["src"]
+  // The contact function's logic is shared with the browser and tested with Vitest. Its Deno
+  // entry point (supabase/functions/contact/index.ts) is checked by Supabase when deployed.
+  "include": ["src", "supabase/functions/_shared", "supabase/functions/contact/handler*.ts"]
 }

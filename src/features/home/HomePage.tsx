@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect, type ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../../components/Icon';
 import { ScrollProgress } from '../../components/ScrollProgress';
@@ -8,6 +8,15 @@ import { MenuSection } from '../catalog/MenuSection';
 import { FaqSection } from '../faq/FaqSection';
 import { HowToOrder } from '../store-info/HowToOrder';
 import { StoreInfo } from '../store-info/StoreInfo';
+
+// The contact form brings the form rules and their library with it, so it loads after the
+// rest of the page instead of with it (NFR-PERF-02). If it cannot load, Messenger and the
+// phone number above still work.
+const ContactForm = lazy<ComponentType>(() =>
+  import('../contact/ContactForm')
+    .then((module) => ({ default: module.ContactForm }))
+    .catch(() => ({ default: () => null })),
+);
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -50,6 +59,9 @@ export function HomePage() {
       <HowToOrder />
       <FaqSection />
       <StoreInfo />
+      <Suspense fallback={null}>
+        <ContactForm />
+      </Suspense>
     </>
   );
 }

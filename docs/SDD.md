@@ -63,7 +63,7 @@ flowchart LR
   Home --> HowTo["HowToOrder"]
   Home --> Info["StoreInfo: Hours, Address, Phone, CopyButton"]
   Home --> Faq["FaqSection"]
-  Home --> Contact["ContactForm"]
+  Home --> Contact["ContactForm, loaded after the page"]
   AdminApp --> Guard["AuthProvider: staff check, two-factor level, idle and maximum-age logout"]
   Guard --> Login["LoginPage: PasswordField with toggle"]
   Guard --> Mfa["MfaPage: 6-digit code"]
@@ -71,7 +71,7 @@ flowchart LR
   Layout --> Items["ItemListPage: AvailabilitySwitch, reorder, Mark all out of stock"]
   Layout --> ItemForm["ItemFormPage: a fieldset per language, PhotoField"]
   Layout --> Cats["CategoriesPage: CategoryForm, reorder"]
-  Layout --> Msgs["MessagesPage, step 8"]
+  Layout --> Msgs["MessagesPage"]
   Layout --> Sec["SecurityPage: two-factor setup"]
   Layout --> Modal["ConfirmModal, shared"]
 ```
@@ -84,7 +84,7 @@ flowchart LR
 | search | Builds an in-memory index from the loaded menu: for each item, the current language's and English name, description and category name, normalized (Unicode NFKC, lowercase, collapsed spaces). Every word of the query must appear, in any order. Runs within the selected category, on each keystroke through React's deferred value. Input is only ever compared as text ([D-017](DECISIONS.md#d-017-search-runs-in-the-browser)) | FR-12 to FR-15, NFR-PERF-05 |
 | i18n | Routes under `/:locale`; any other first segment goes back to the root. The root route picks a language from the saved choice, then `navigator.languages` (`tl` counts as Filipino), then English, keeping the query string. Only an explicit choice in the language menu is saved, so opening someone's shared link in another language does not change the visitor's default. One i18next instance per language, chosen by the route, so a switch re-renders the page in one step without a reload. Sets `<html lang>` before paint, formats prices and times with `Intl` ([TRD 5](TRD.md#5-localization)). Fallback text gets its own `lang` attribute. Translation keys are type-checked, and a unit test keeps the three languages' keys identical | FR-16 to FR-21, NFR-ACC-05 |
 | store-info | Reads store facts from `config/store.ts`. Hours are stored per day as opening and closing times; a closing time at or before the opening time means the next day. Copy buttons use the Clipboard API, falling back to selecting the text with a hint to copy it where the API is blocked. Announces "Copied" through a live region. "How to order" is a three-step list with a Messenger button | FR-22 to FR-26 |
-| contact | Floating button and all contact links use the Messenger link from store facts. The contact form validates with the shared schema for instant feedback, then posts to the `contact` function, which validates again ([section 3.2](#32-contact-function)) | FR-27 to FR-31, NFR-SEC-17 |
+| contact | Floating button and all contact links use the Messenger link from store facts. The contact form validates with the shared schema (`supabase/functions/_shared/contactSchema.ts`) for instant feedback, then posts to the `contact` function with `fetch`, which validates again ([section 3.2](#32-contact-function)). Campaign details go along only with consent. On success a thank-you replaces the form and takes focus. The form is loaded after the rest of the page, so its validation library stays out of the first download | FR-27 to FR-31, NFR-SEC-17 |
 | faq | Questions and answers are per-language JSON files (`src/features/faq/faq.<locale>.json`), shown as native `<details>` elements. Entries marked `todo` show a "Draft" tag outside production, and a Vite plugin fails any build with `VITE_APP_ENV=production` while one remains | FR-33 |
 | consent | Privacy banner in the floating stack, stored choice (kept in memory when storage is blocked), footer "Privacy choices" to change it. Captures the five UTM values at start-up, keeps them in memory until Accept, then in `sessionStorage`; Decline discards them ([section 7.3](#73-cookie-consent-analytics-and-utm)). No analytics provider is chosen yet ([D-036](DECISIONS.md#d-036-the-privacy-banner-comes-before-any-analytics)); when one is, it loads only after Accept, and never under `/admin` | FR-54 to FR-57, NFR-PRIV-04 |
 | legal | Privacy and terms pages from structured per-language content (headings, paragraphs, lists) rendered as React elements, never as raw HTML. Each shows its last updated date, a note that it awaits legal review, and the "English version prevails" note ([D-009](DECISIONS.md#d-009-legal-pages-in-three-languages-english-prevails)). Routes `/:locale/privacy` and `/:locale/terms`; store facts are filled in from `config/store.ts` | FR-58, FR-59 |
@@ -107,7 +107,7 @@ The admin panel is in English only ([D-025](DECISIONS.md#d-025-admin-panel-in-en
 
 | Function | Design | SRS |
 |---|---|---|
-| `contact` | Checks origin, content type and size, then validates the body with the shared Zod schema. A filled honeypot gets a normal success response and is discarded. Applies the rate limit, then inserts the message using the service role. Details in [section 3.2](#32-contact-function) | FR-29 to FR-31, NFR-SEC-09, NFR-SEC-12, NFR-SEC-16, NFR-SEC-17 |
+| `contact` | Checks origin, method, content type and size, then validates the body with the shared Zod schema. A filled honeypot gets a normal success response and is discarded. Applies the rate limit, then inserts the message using the service role. Supabase's token check is off; the function's own checks replace it ([D-037](DECISIONS.md#d-037-the-contact-function-does-its-own-checks-instead-of-supabases-token-check)). The logic is in `handler.ts`, free of Deno imports, so unit tests and the end-to-end fake run the same code; `index.ts` only wires in the database and settings. Details in [section 3.2](#32-contact-function) | FR-29 to FR-31, NFR-SEC-09, NFR-SEC-12, NFR-SEC-16, NFR-SEC-17 |
 | `messenger-webhook` (Deferred) | Supabase's JWT check is turned off for this function, because Meta cannot send a Supabase token. The signature check replaces it. Acknowledges valid events immediately and finishes the work in the background with `EdgeRuntime.waitUntil`. Details in [section 3.3](#33-messenger-webhook-deferred) | FR-48 to FR-53, [D-023](DECISIONS.md#d-023-messenger-webhook-limits-by-sender-not-by-ip) |
 
 ### 2.5 Reply engine (Deferred)
@@ -130,7 +130,7 @@ All Supabase endpoints are under `https://<project>.supabase.co`. "Anon key" mea
 | E2 | `GET /rest/v1/items` | Anon key; RLS returns published only | Supabase platform | Query: public columns only, `order=sort_order` | `200`, list | `5xx` shows FR-11 state |
 | E3 | `GET /rest/v1/menu_state` | Anon key | With each menu load, when the subscription starts, when the tab is shown again, and every 10 s as the Realtime fallback | Query: `version` | `200` | Ignored, retried at the next check |
 | E4 | Realtime: changes to `public.menu_state` | Anon key | Supabase plan connection cap | Subscribe to `UPDATE` | Event with new `version` | Channel error starts E3 polling |
-| E5 | `POST /functions/v1/contact` | Anon key; `Origin` must be the site | 5 per IP per 10 minutes | JSON, up to 8 KB ([3.2](#32-contact-function)) | `200 {"ok": true}` | `400`, `403`, `413`, `415`, `429` with `Retry-After`, `500` |
+| E5 | `POST /functions/v1/contact` | None; `Origin` must be on the allowlist ([D-037](DECISIONS.md#d-037-the-contact-function-does-its-own-checks-instead-of-supabases-token-check)) | 5 per IP per 10 minutes | JSON, up to 8 KB ([3.2](#32-contact-function)) | `200 {"ok": true}` | `400`, `403`, `413`, `415`, `429` with `Retry-After`, `500` |
 | E6 | `POST /auth/v1/token?grant_type=password` | Anon key | Supabase Auth per IP, `429` without `Retry-After` ([D-033](DECISIONS.md#d-033-staff-login-keeps-supabase-auths-limit-without-retry-after)) | Email, password | `200`, session | `400` shows the generic message; `429` "Too many attempts" |
 | E7 | Auth two-factor endpoints (enroll, challenge, verify) | Staff token | Supabase Auth | Factor ID, code | `200` | `400` "Wrong code" |
 | E8 | `POST /auth/v1/logout` | Staff token | | | `204` | Ignored; local session cleared anyway |
@@ -170,7 +170,9 @@ Responses:
 | `429` | `{"error": "rate_limited"}` plus `Retry-After` | More than 5 messages per IP in 10 minutes |
 | `500` | `{"error": "server"}` | Anything unexpected; details go to Sentry only |
 
-The rate limit key is `contact:` plus a SHA-256 hash of the client IP and a secret salt. The IP comes from the first `X-Forwarded-For` entry set by Supabase's edge, and is never stored or logged in plain form.
+Settings: `ALLOWED_ORIGINS` (comma-separated exact origins) and `CONTACT_IP_SALT` (random secret), as Edge Function secrets, or `supabase/functions/.env` locally. Without either, every request is refused. Logs hold the request ID, status and duration only.
+
+The rate limit key is `contact:` plus a SHA-256 hash of the client IP and a secret salt. The IP comes from the first `X-Forwarded-For` entry set by Supabase's edge, and is never stored or logged in plain form. Checked on staging on 2026-10-19: Supabase's edge replaces any `X-Forwarded-For` the caller sends, and the first entry matches `CF-Connecting-IP`, so a visitor cannot dodge the limit by forging the header. Repeat that check if Supabase changes how requests reach functions.
 
 ### 3.3 Messenger webhook (Deferred)
 

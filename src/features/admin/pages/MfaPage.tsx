@@ -1,6 +1,6 @@
 import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BusyButton, FailureMessage, TextField } from '../components/fields';
+import { BusyButton, FailureMessage, TextField } from '../../../components/fields';
 import { useAuth, type MfaFailure } from '../session/authContext';
 
 /** The second login step for staff who turned on two-factor login (FR-47, SDD 7.2). */

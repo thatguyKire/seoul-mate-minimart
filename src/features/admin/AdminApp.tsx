@@ -10,6 +10,7 @@ import { CategoriesPage } from './pages/CategoriesPage';
 import { ItemFormPage } from './pages/ItemFormPage';
 import { ItemListPage } from './pages/ItemListPage';
 import { LoginPage } from './pages/LoginPage';
+import { MessagesPage } from './pages/MessagesPage';
 import { MfaPage } from './pages/MfaPage';
 import { SecurityPage } from './pages/SecurityPage';
 import { AuthProvider } from './session/auth';
@@ -72,6 +73,7 @@ function AdminGate() {
             <Route path="items/new" element={<ItemFormPage />} />
             <Route path="items/:id" element={<ItemFormPage />} />
             <Route path="categories" element={<CategoriesPage />} />
+            <Route path="messages" element={<MessagesPage />} />
             <Route path="security" element={<SecurityPage />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
           </Route>
