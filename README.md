@@ -15,7 +15,7 @@ Website for **Seoul-Mate Minimart**, *your one stop shop* for Korean goodies and
 
 ## Project status
 
-Steps 1 to 5 of 11 are done: requirements, design, repository setup, database, and the public menu (live availability, search, English, Filipino and Korean, store information). The menu shows sample products until the real list arrives. Progress and next steps are in [HANDOFF.md](HANDOFF.md).
+Steps 1 to 6 of 11 are done: requirements, design, repository setup, database, the public menu (live availability, search, English, Filipino and Korean, store information) and the staff panel at `/admin`. The menu shows sample products until the real list arrives. Progress and next steps are in [HANDOFF.md](HANDOFF.md).
 
 ## Local setup
 
@@ -60,10 +60,22 @@ Server secrets never go in `.env` files for the frontend. Where they live is in 
 | `npm run db:test` | Database tests (pgTAP) against the local stack |
 | `npm run db:test:pglite` | The same database tests without Docker, in PGlite (development aid; CI decides) |
 | `npm run db:lint` | Check database functions for errors |
+| `npm run db:staff -- <email> <password>` | Create a staff login on the local stack only; refuses any other database ([D-028](docs/DECISIONS.md#d-028-no-staff-account-in-seed-data)) |
 
 End-to-end tests on Windows: run `npm run build:e2e`, start `npm run preview:e2e` in a second terminal, then run `npm run test:e2e`. Locally they use the installed Microsoft Edge, so no browser download is needed. The tests answer Supabase requests themselves, so they need no Docker; `e2e/live-stack.spec.ts`, which needs a real local stack, runs in CI only ([D-031](docs/DECISIONS.md#d-031-end-to-end-tests-use-a-fake-supabase-plus-one-live-stack-test-in-ci)).
 
 To see the site with data in `npm run dev`, put a Supabase project URL and anon (publishable) key in `.env.local`: the staging project's, from its dashboard under Project Settings, API Keys, or a local stack's (`npm run db:start`, needs Docker). Set `VITE_APP_ENV=staging` for the staging project. Without them the menu shows its error state.
+
+## Staff accounts
+
+Staff log in at `/admin`. There is no sign-up: the owner adds each staff member in the Supabase dashboard of the project (staging, and later production):
+
+1. **Authentication, Users, Add user, Create new user.** Enter the email and a password of at least 12 characters with lowercase and uppercase letters and digits, and tick "Auto Confirm User".
+2. **Copy the new user's ID** (UID) from the user list.
+3. **Table Editor, `admins`, Insert row.** Paste the ID into `user_id`. Set `require_mfa` to `true` to make two-factor login compulsory for this person; they can change the menu only after setting it up.
+4. The staff member logs in at `/admin` and can turn on two-factor login under Security.
+
+To remove a staff member, delete their `admins` row, which takes away their rights at once, and then delete the user. A login without an `admins` row can't use the staff panel.
 
 ## Contributing
 

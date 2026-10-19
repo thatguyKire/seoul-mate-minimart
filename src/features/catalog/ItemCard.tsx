@@ -19,7 +19,11 @@ export function ItemCard({ item }: { item: Item }) {
 
   return (
     <li className={item.is_available ? 'item-card' : 'item-card item-card--out'}>
-      <ItemPhoto key={item.photo_path ?? 'none'} path={item.photo_path} />
+      <ItemPhoto
+        key={item.photo_path ?? 'none'}
+        path={item.photo_path}
+        format={item.photo_format}
+      />
       <div className="item-card__body">
         <h4 className="item-card__name" {...langAttribute(name, locale)}>
           {name.text}

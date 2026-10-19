@@ -59,6 +59,7 @@ function item(
     description_fil: null,
     description_ko: null,
     photo_path: null,
+    photo_format: null,
     is_available: true,
     is_sample: true,
     sort_order: sortOrder,

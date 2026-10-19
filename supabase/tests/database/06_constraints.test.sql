@@ -2,7 +2,7 @@
 -- only constraints, not access rules, decide the outcome.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(12);
+select plan(14);
 
 truncate public.items, public.categories, public.contact_messages;
 insert into public.categories (id, slug, name_en) values ('c0000000-0000-4000-8000-000000000001', 'snacks', 'Snacks');
@@ -31,19 +31,35 @@ select throws_ok(
 );
 select throws_ok(
   $$
-    insert into public.items (id, category_id, name_en, price_centavos, photo_path)
+    insert into public.items (id, category_id, name_en, price_centavos, photo_path, photo_format)
     values ('d0000000-0000-4000-8000-000000000002', 'c0000000-0000-4000-8000-000000000001', 'X', 1,
-            'items/d0000000-0000-4000-8000-000000000001/1700000000000')
+            'items/d0000000-0000-4000-8000-000000000001/1700000000000', 'webp')
   $$,
   '23514', null, 'A photo path must belong to its own item'
 );
 select lives_ok(
   $$
-    insert into public.items (id, category_id, name_en, price_centavos, photo_path)
+    insert into public.items (id, category_id, name_en, price_centavos, photo_path, photo_format)
     values ('d0000000-0000-4000-8000-000000000003', 'c0000000-0000-4000-8000-000000000001', 'X', 1,
-            'items/d0000000-0000-4000-8000-000000000003/1700000000000')
+            'items/d0000000-0000-4000-8000-000000000003/1700000000000', 'jpg')
   $$,
   'A photo path in the item''s own folder is accepted'
+);
+select throws_ok(
+  $$
+    insert into public.items (id, category_id, name_en, price_centavos, photo_path)
+    values ('d0000000-0000-4000-8000-000000000004', 'c0000000-0000-4000-8000-000000000001', 'X', 1,
+            'items/d0000000-0000-4000-8000-000000000004/1700000000000')
+  $$,
+  '23514', null, 'A photo needs its format'
+);
+select throws_ok(
+  $$
+    insert into public.items (id, category_id, name_en, price_centavos, photo_path, photo_format)
+    values ('d0000000-0000-4000-8000-000000000005', 'c0000000-0000-4000-8000-000000000001', 'X', 1,
+            'items/d0000000-0000-4000-8000-000000000005/1700000000000', 'png')
+  $$,
+  '23514', null, 'Photos are WebP or JPEG only'
 );
 select throws_ok(
   $$ insert into public.contact_messages (name, contact, message, locale) values ('A', '1234', 'Hi', 'en') $$,

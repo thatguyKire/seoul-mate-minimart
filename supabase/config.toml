@@ -222,7 +222,10 @@ web3 = 30
 
 [auth.email]
 # Allow/disallow new user signups via email to your project.
-enable_signup = false
+# Despite its name, the CLI maps this to GOTRUE_EXTERNAL_EMAIL_ENABLED: false turns email and
+# password login off entirely, staff included. Sign-ups stay closed through
+# [auth] enable_signup = false above (D-001); e2e/live-stack.spec.ts checks that a sign-up is refused.
+enable_signup = true
 # If enabled, a user will be required to confirm any email change on both the old, and new email
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true

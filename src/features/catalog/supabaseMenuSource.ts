@@ -7,7 +7,7 @@ const categoryColumns = 'id, slug, name_en, name_fil, name_ko, sort_order';
 // Only columns the anonymous role may select (BACKEND-SCHEMA 3). Asking for any other
 // column would make the whole request fail. One string literal, so the client can type the rows.
 const itemColumns =
-  'id, category_id, name_en, name_fil, name_ko, description_en, description_fil, description_ko, price_centavos, photo_path, is_available, is_sample, sort_order, availability_changed_at';
+  'id, category_id, name_en, name_fil, name_ko, description_en, description_fil, description_ko, price_centavos, photo_path, photo_format, is_available, is_sample, sort_order, availability_changed_at';
 
 export function createSupabaseMenuSource(client: PublicClient): MenuSource {
   async function loadVersion(): Promise<number> {

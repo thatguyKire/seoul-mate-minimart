@@ -24,3 +24,12 @@ All notable changes to this project are recorded here. The format follows [Keep 
 - Store information: opening hours for each day, address and phone with copy buttons, tap to call, and how to order.
 - Layout: sticky header, mobile menu, skip link, floating Messenger button, footer; light and dark themes from the system setting; self-hosted Fredoka, Nunito and Noto Sans KR.
 - End-to-end tests with a fake Supabase (live updates, dropped connection, errors, injection strings, languages, axe checks in both themes) and a CI test against a real local stack.
+- Staff panel at `/admin`, loaded only there: login with a show-password toggle and one message for every refusal; accounts that are not staff are logged straight out; optional two-factor login with an authenticator app; logout after 60 minutes without activity or 12 hours after login.
+- Items: a one-tap in-stock switch, "Mark all out of stock" and delete behind a confirmation, reordering, and a form with English, Filipino and Korean text, category, price, photo and menu visibility, with inline errors, an error summary and a saving spinner.
+- Photos: checked by their first bytes and size, then resized to three widths in the browser and saved as WebP or JPEG with all metadata, including location, removed.
+- Categories: add, rename in three languages, reorder, and delete, refused in plain words while a category still has items.
+- `npm run db:staff`: creates a staff login on the local Supabase stack only.
+
+### Changed
+
+- Items record their photo format, so the menu asks for the right files (migration `20261019120000_photo_format.sql`).

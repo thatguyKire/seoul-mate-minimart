@@ -194,7 +194,7 @@ Each entry records one decision: date, context, the choice, and the alternatives
 ## D-024: Admin login uses Supabase Auth's rate limits
 
 - **Date:** 2026-10-18
-- **Status:** Accepted, to verify in step 6
+- **Status:** Replaced by D-033
 - **Context:** Staff log in directly against Supabase Auth, which has its own per-IP rate limits for sign-in. The brief asks for `429` with `Retry-After`.
 - **Decision:** Use Supabase Auth's built-in limits, set in the Auth settings. In step 6, check whether Auth's `429` responses include `Retry-After`. If they do not, add a small login function that applies the project's own limit before passing the login to Auth.
 - **Alternatives considered:** Always routing login through our own function (deferred: more code that handles passwords, only needed if the built-in limits fall short).
@@ -264,3 +264,29 @@ Each entry records one decision: date, context, the choice, and the alternatives
 - **Decision:** The existing project is the staging project. Each migration file in `supabase/migrations` is applied unchanged through the Supabase connector, after it has passed CI, and its recorded version in `supabase_migrations.schema_migrations` is then set to the file's timestamp, as `supabase migration repair` would. `supabase db push` from CI therefore sees them as applied. `supabase/seed.sql` is run on staging only. Auth settings from `supabase/config.toml` are set by hand in the dashboard, because the connector cannot change them.
 - **Alternatives considered:** `supabase link` and `supabase db push` from the development PC (rejected for now: needs an interactive login and the database password on the PC). Waiting for step 10 (rejected: the site could not be checked against a real project until then).
 - **Applied so far:** migrations `20261018130000` to `20261018130300` and the seed, on 2026-10-18. Checked afterwards: visitors see 11 published items and are refused audit columns, writes, the menu version, contact messages and the rate limiter; the security advisor reports only the intended policy-free `rate_limits` table; an open page showed a database change 1.1 seconds after the API did.
+
+## D-033: Staff login keeps Supabase Auth's limit, without Retry-After
+
+- **Date:** 2026-10-19
+- **Status:** Accepted. Replaces D-024
+- **Context:** D-024 asked step 6 to check whether Supabase Auth's `429` responses carry `Retry-After`, and to add a login function of our own if not. On the staging project, wrong logins for a made-up address were answered `400` until about the 41st attempt, then `429 Too Many Requests` with the body `over_request_rate_limit` and no `Retry-After` header.
+- **Decision:** Keep Supabase Auth's per-IP limit as the protection against password guessing (NFR-SEC-16). The login page answers `429` with "Too many attempts. Try again in a few minutes." No login function is added.
+- **Reasons, security first:** A login function would receive staff passwords, so a new endpoint would handle the most sensitive input on the site. And because the function would call Supabase Auth itself, Auth would see the function's address for every staff login instead of each person's, weakening the very per-IP limit that stops guessing. The missing header only affects automated clients, which have no reason to log in here.
+- **Alternatives considered:** The login function from D-024 (rejected for the reasons above). A Retry-After header added by the host (not possible: logins go straight to Supabase, not through the host).
+- **Deviation from the brief:** section 2 asks for `429` with `Retry-After` on admin login. Logins get `429` without the header.
+
+## D-034: An item's photo format is stored with it
+
+- **Date:** 2026-10-19
+- **Status:** Accepted
+- **Context:** Photos are stored as WebP, or as JPEG when the staff member's browser cannot make WebP (D-019). Until step 6 the menu could not tell which, so it tried WebP first and fell back to JPEG, costing a failed request for every JPEG photo on every visit.
+- **Decision:** A new column, `items.photo_format`, holds `webp` or `jpg`, set together with `photo_path`; a check makes them both set or both empty. Visitors may read it. Migration `20261019120000_photo_format.sql`.
+- **Alternatives considered:** Encoding the format in the folder name (rejected: hides a fact in a string format). Always uploading both formats (rejected: Safari cannot make WebP at all).
+
+## D-035: Images from data: addresses are allowed, for the two-factor QR code
+
+- **Date:** 2026-10-19
+- **Status:** Accepted
+- **Context:** Supabase Auth returns the QR code for setting up two-factor login (FR-47) as an SVG image in a `data:` address. The planned Content Security Policy allows images only from the site and Supabase (SDD 5.5).
+- **Decision:** Add `data:` to `img-src`. An image in an `<img>` element cannot run scripts, even an SVG one, so this does not weaken the protection against injected scripts. The setup screen also shows the key as text, for apps that cannot scan.
+- **Alternatives considered:** Drawing the QR code ourselves from the `otpauth:` address (rejected: another dependency for one screen). Showing only the text key (rejected: harder for staff on a phone).

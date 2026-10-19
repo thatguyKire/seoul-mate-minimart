@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Status | 1.0, approved by the owner on 2026-10-18 |
-| Last updated | 2026-10-18 |
+| Last updated | 2026-10-19 |
 | Structure | Based on IEEE 1016 |
 
 This document owns **how each part is built**. It refers to requirement IDs in [SRS.md](SRS.md) and decisions in [DECISIONS.md](DECISIONS.md) instead of restating them.
@@ -65,21 +65,23 @@ flowchart LR
   Home --> Info["StoreInfo: Hours, Address, Phone, CopyButton"]
   Home --> Faq["FaqAccordion"]
   Home --> Contact["ContactForm"]
-  AdminApp --> Login["LoginPage: PasswordField with toggle, MfaChallenge"]
-  AdminApp --> Guard["SessionGuard: idle and maximum-age logout"]
-  Guard --> Items["ItemListPage: AvailabilitySwitch, MarkAllOutOfStock"]
-  Guard --> ItemForm["ItemFormPage: LanguageTabs, PhotoUploader"]
-  Guard --> Cats["CategoriesPage"]
-  Guard --> Msgs["MessagesPage"]
-  Guard --> Sec["SecurityPage: two-factor setup"]
-  AdminApp --> Modal["ConfirmModal, shared"]
+  AdminApp --> Guard["AuthProvider: staff check, two-factor level, idle and maximum-age logout"]
+  Guard --> Login["LoginPage: PasswordField with toggle"]
+  Guard --> Mfa["MfaPage: 6-digit code"]
+  Guard --> Layout["AdminLayout: nav, log out"]
+  Layout --> Items["ItemListPage: AvailabilitySwitch, reorder, Mark all out of stock"]
+  Layout --> ItemForm["ItemFormPage: a fieldset per language, PhotoField"]
+  Layout --> Cats["CategoriesPage: CategoryForm, reorder"]
+  Layout --> Msgs["MessagesPage, step 8"]
+  Layout --> Sec["SecurityPage: two-factor setup"]
+  Layout --> Modal["ConfirmModal, shared"]
 ```
 
 ### 2.2 Public site modules
 
 | Module | Design | SRS |
 |---|---|---|
-| catalog | Loads `menu_state.version`, categories and published items through the Database API, the version request first. Subscribes to `menu_state` changes and reloads the menu 300 ms after the last change event. Each time the subscription starts, and when the tab becomes visible again, it compares the version and reloads if it changed, which catches changes made before or between subscriptions. If Realtime fails, checks the version every 10 seconds instead and shows a "live updates paused" notice ([D-020](DECISIONS.md#d-020-live-updates-through-a-one-row-version-table)). A failed reload keeps the last menu on screen; a failed first load shows the error state, retried by the visitor or by the next check. Requests time out after 15 seconds. "Last updated" is the latest `availability_changed_at` among published items. Category filter is a `?category=<slug>` query, so filtered links can be shared. Photos load as WebP, then JPEG, then the placeholder if neither exists. Shows a "Sample" label and notice on sample items outside production. The logic lives in `liveMenu.ts`, free of React, so it is unit-tested with fake timers | FR-01 to FR-11, NFR-REL-01 |
+| catalog | Loads `menu_state.version`, categories and published items through the Database API, the version request first. Subscribes to `menu_state` changes and reloads the menu 300 ms after the last change event. Each time the subscription starts, and when the tab becomes visible again, it compares the version and reloads if it changed, which catches changes made before or between subscriptions. If Realtime fails, checks the version every 10 seconds instead and shows a "live updates paused" notice ([D-020](DECISIONS.md#d-020-live-updates-through-a-one-row-version-table)). A failed reload keeps the last menu on screen; a failed first load shows the error state, retried by the visitor or by the next check. Requests time out after 15 seconds. "Last updated" is the latest `availability_changed_at` among published items. Category filter is a `?category=<slug>` query, so filtered links can be shared. Photos load in the format stored with the item ([D-034](DECISIONS.md#d-034-an-items-photo-format-is-stored-with-it)), and the placeholder shows if a file cannot load. Shows a "Sample" label and notice on sample items outside production. The logic lives in `liveMenu.ts`, free of React, so it is unit-tested with fake timers | FR-01 to FR-11, NFR-REL-01 |
 | search | Builds an in-memory index from the loaded menu: for each item, the current language's and English name, description and category name, normalized (Unicode NFKC, lowercase, collapsed spaces). Every word of the query must appear, in any order. Runs within the selected category, on each keystroke through React's deferred value. Input is only ever compared as text ([D-017](DECISIONS.md#d-017-search-runs-in-the-browser)) | FR-12 to FR-15, NFR-PERF-05 |
 | i18n | Routes under `/:locale`; any other first segment goes back to the root. The root route picks a language from the saved choice, then `navigator.languages` (`tl` counts as Filipino), then English, keeping the query string. Only an explicit choice in the language menu is saved, so opening someone's shared link in another language does not change the visitor's default. One i18next instance per language, chosen by the route, so a switch re-renders the page in one step without a reload. Sets `<html lang>` before paint, formats prices and times with `Intl` ([TRD 5](TRD.md#5-localization)). Fallback text gets its own `lang` attribute. Translation keys are type-checked, and a unit test keeps the three languages' keys identical | FR-16 to FR-21, NFR-ACC-05 |
 | store-info | Reads store facts from `config/store.ts`. Hours are stored per day as opening and closing times; a closing time at or before the opening time means the next day. Copy buttons use the Clipboard API, falling back to selecting the text with a hint to copy it where the API is blocked. Announces "Copied" through a live region. "How to order" is a three-step list with a Messenger button | FR-22 to FR-26 |
@@ -93,12 +95,12 @@ flowchart LR
 
 | Module | Design | SRS |
 |---|---|---|
-| auth | Email and password login through Supabase Auth. Every failure shows "Wrong email or password"; a `429` shows "Too many attempts, try again later". Two-factor setup and challenge with an authenticator app. `SessionGuard` logs out after 60 minutes without input or 12 hours after `last_sign_in_at` ([section 5.4](#54-staff-sessions)) | FR-34 to FR-36, FR-46, FR-47 |
-| items | List grouped by category with a one-tap availability switch, "Mark all out of stock", delete, and reorder. Form with English, Filipino and Korean tabs (English required), price entered in pesos and stored in centavos, category, published, photo. A write that returns no rows means RLS refused it, and is shown as a permission error | FR-37 to FR-41, FR-45 |
-| categories | Create, rename in three languages, reorder through `reorder_categories`, delete. Deleting a category that has items is refused by the database and explained in plain words | FR-42 |
-| photos | Checks the file's first bytes (JPEG, PNG or WebP) and size (5 MB or less). Draws it onto a canvas at widths 320, 640 and 1024, encodes WebP or, if unsupported, JPEG, and uploads only those files ([D-019](DECISIONS.md#d-019-photos-are-processed-in-the-staff-members-browser)). Deletes the previous version's files after a successful save | FR-43, FR-44 |
-| messages | Lists contact messages, newest first. Text is rendered as plain text | FR-32, NFR-SEC-10 |
-| confirm-modal | Accessible dialog: focus moves in and is trapped, Escape and Cancel close it without changes, focus returns to the button that opened it | FR-41 |
+| auth | Email and password login through Supabase Auth, with its own client and session (`adminClient.ts`). Every refusal shows "Wrong email or password"; a `429` shows "Too many attempts. Try again in a few minutes." ([D-033](DECISIONS.md#d-033-staff-login-keeps-supabase-auths-limit-without-retry-after)). After login, `AuthProvider` reads the account's own `admins` row and logs straight out if there is none; asks for a code when the account has a verified two-factor factor and the session is still `aal1`; and applies the session limits ([section 5.4](#54-staff-sessions)). Two-factor setup and removal on the Security page | FR-34 to FR-37, FR-46, FR-47 |
+| items | List grouped by category, hidden items included, with a one-tap availability switch (shown at once, put back if the save fails), "Mark all out of stock", and reorder through `reorder_items`. Form with a fieldset each for English (required), Filipino and Korean; price entered in pesos and stored in centavos; category; shown on the menu; in stock; photo. Validated in the browser with Zod for quick feedback (`schemas.ts`); the database constraints decide. Empty translations are stored as null, so visitors see English. All reads and writes are in `adminData.ts`: a write that changes no rows calls `is_admin()` to tell "refused by RLS" from "the row is gone" | FR-37 to FR-41, FR-45 |
+| categories | Create, rename in three languages, reorder through `reorder_categories`, delete. A new category's web address name is made from its English name until edited. Deleting a category that has items is refused by the database (`23503`) and explained in plain words | FR-42 |
+| photos | Checks the file's first bytes (JPEG, PNG or WebP) and size (5 MB or less). Decodes it with its EXIF rotation applied, draws it onto a canvas at widths 320, 640 and 1024 (never enlarging), encodes WebP or, if unsupported, JPEG, lowering quality until each file fits the 1 MB bucket limit, and uploads only those files ([D-019](DECISIONS.md#d-019-photos-are-processed-in-the-staff-members-browser)). The preview is drawn on a canvas, so the original is never displayed. The item records `photo_format` ([D-034](DECISIONS.md#d-034-an-items-photo-format-is-stored-with-it)). A new item is created first, because the photo folder is named after its id. Deletes the previous version's files after a successful save, and the new files if the save fails | FR-43, FR-44 |
+| messages | Lists contact messages, newest first. Text is rendered as plain text. Built with the contact form in step 8 | FR-32, NFR-SEC-10 |
+| confirm-modal | A native modal `<dialog>`: the rest of the page is inert, Cancel has focus first, Escape and Cancel close it without changes, and the browser returns focus to the button that opened it | FR-41 |
 
 The admin panel is in English only ([D-025](DECISIONS.md#d-025-admin-panel-in-english-only-for-v1)).
 
@@ -130,7 +132,7 @@ All Supabase endpoints are under `https://<project>.supabase.co`. "Anon key" mea
 | E3 | `GET /rest/v1/menu_state` | Anon key | With each menu load, when the subscription starts, when the tab is shown again, and every 10 s as the Realtime fallback | Query: `version` | `200` | Ignored, retried at the next check |
 | E4 | Realtime: changes to `public.menu_state` | Anon key | Supabase plan connection cap | Subscribe to `UPDATE` | Event with new `version` | Channel error starts E3 polling |
 | E5 | `POST /functions/v1/contact` | Anon key; `Origin` must be the site | 5 per IP per 10 minutes | JSON, up to 8 KB ([3.2](#32-contact-function)) | `200 {"ok": true}` | `400`, `403`, `413`, `415`, `429` with `Retry-After`, `500` |
-| E6 | `POST /auth/v1/token?grant_type=password` | Anon key | Supabase Auth per IP ([D-024](DECISIONS.md#d-024-admin-login-uses-supabase-auths-rate-limits)) | Email, password | `200`, session | `400` shows the generic message; `429` "Too many attempts" |
+| E6 | `POST /auth/v1/token?grant_type=password` | Anon key | Supabase Auth per IP, `429` without `Retry-After` ([D-033](DECISIONS.md#d-033-staff-login-keeps-supabase-auths-limit-without-retry-after)) | Email, password | `200`, session | `400` shows the generic message; `429` "Too many attempts" |
 | E7 | Auth two-factor endpoints (enroll, challenge, verify) | Staff token | Supabase Auth | Factor ID, code | `200` | `400` "Wrong code" |
 | E8 | `POST /auth/v1/logout` | Staff token | | | `204` | Ignored; local session cleared anyway |
 | E9 | `GET /rest/v1/items`, `/categories`, `/contact_messages` | Staff token; RLS checks `is_admin()` | | Query | `200` | `401` sends staff to login |
@@ -282,7 +284,7 @@ Policies, privileges and functions are in [BACKEND-SCHEMA 3 and 4](BACKEND-SCHEM
 ### 5.4 Staff sessions
 
 - Access tokens last 15 minutes and refresh tokens rotate (Supabase Auth settings).
-- `SessionGuard` signs out after 60 minutes without keyboard, pointer or touch input, or 12 hours after `last_sign_in_at` ([D-016](DECISIONS.md#d-016-admin-session-limits)). Signing out also revokes the refresh token on the server.
+- `AuthProvider` signs out after 60 minutes without keyboard, pointer or touch input, or 12 hours after `last_sign_in_at` ([D-016](DECISIONS.md#d-016-admin-session-limits)). It checks every 30 seconds, when the tab is shown again, and on input. The time of the last input is kept in `localStorage`, so closing the tab does not restart the idle clock. Signing out (scope `local`) also revokes this session's refresh token on the server; the local session is cleared even when the server cannot be reached.
 - If the Supabase plan in use offers server-side session time limits, they are set to the same values, so the limits hold even if the frontend is bypassed.
 - The token travels in a header, so CSRF does not apply ([D-022](DECISIONS.md#d-022-staff-token-sent-in-a-header-not-a-cookie)).
 - Sign-ups are disabled in Auth settings. Staff accounts are created by the owner.
@@ -293,13 +295,15 @@ Set by the host once chosen (NFR-SEC-11). `<project>` and the Sentry host are fi
 
 | Header | Value |
 |---|---|
-| `Content-Security-Policy` | `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://<project>.supabase.co; font-src 'self'; connect-src 'self' https://<project>.supabase.co wss://<project>.supabase.co https://<sentry ingest host>; manifest-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests` |
+| `Content-Security-Policy` | `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: https://<project>.supabase.co; font-src 'self'; connect-src 'self' https://<project>.supabase.co wss://<project>.supabase.co https://<sentry ingest host>; manifest-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests` |
 | `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` |
 | `X-Content-Type-Options` | `nosniff` |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=(), usb=()` |
 | `X-Frame-Options` | `DENY`, for older browsers that ignore `frame-ancestors` |
 | `Cross-Origin-Opener-Policy` | `same-origin` |
+
+`data:` in `img-src` is for the two-factor QR code, an SVG image that cannot run scripts inside `<img>` ([D-035](DECISIONS.md#d-035-images-from-data-addresses-are-allowed-for-the-two-factor-qr-code)).
 
 The `contact` function sends `Access-Control-Allow-Origin` with the exact site origin from an allowlist per environment, and `Vary: Origin` (NFR-SEC-12).
 
@@ -326,7 +330,7 @@ CI fails if the built bundle contains a service role key or any other known secr
 
 | Endpoint | Limit | Enforced by |
 |---|---|---|
-| Admin login | Supabase Auth per-IP limits | Supabase Auth ([D-024](DECISIONS.md#d-024-admin-login-uses-supabase-auths-rate-limits)) |
+| Admin login | Supabase Auth per-IP limits; `429` without `Retry-After` | Supabase Auth ([D-033](DECISIONS.md#d-033-staff-login-keeps-supabase-auths-limit-without-retry-after)) |
 | Contact form | 5 per IP per 10 minutes | `check_rate_limit` in the `contact` function |
 | Messenger webhook (Deferred) | 10 events per sender per minute, after the signature check | `check_rate_limit` in the webhook ([D-023](DECISIONS.md#d-023-messenger-webhook-limits-by-sender-not-by-ip)) |
 | Search | None needed: runs in the browser | [D-017](DECISIONS.md#d-017-search-runs-in-the-browser) |
