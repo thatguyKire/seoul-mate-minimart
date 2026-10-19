@@ -10,7 +10,8 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 
 - Steps 1 to 5 are done: requirements, design (approved by the owner), repository setup, database, and the public catalog.
 - The public site works against any Supabase project: menu by category with live availability, search, category filter, English, Filipino and Korean under `/en/`, `/fil/`, `/ko/`, store information, how to order, mobile menu, floating Messenger button. Light and dark themes follow the system setting; the toggle comes in step 8.
-- No Supabase account or hosted project exists yet, and Docker is not installed, so the site has not been seen with live data on the development PC. End-to-end tests use a fake Supabase locally; CI also runs `e2e/live-stack.spec.ts` against a real local stack ([D-031](docs/DECISIONS.md#d-031-end-to-end-tests-use-a-fake-supabase-plus-one-live-stack-test-in-ci)).
+- Staging Supabase project: `vebcdxmhoeksxnlyrmqf`, free plan, Tokyo region, with all four migrations and the sample data ([D-032](docs/DECISIONS.md#d-032-staging-migrations-applied-through-the-supabase-connector-until-step-10)). Its URL and publishable key are in `.env.local` on the development PC (git-ignored), so `npm run dev` shows real data. The owner set its auth settings in the dashboard on 2026-10-19 to match `supabase/config.toml` ([auth] section): sign-ups off, 900-second access tokens, passwords of 12 or more characters with lowercase, uppercase and digits, TOTP two-factor, 15 sign-ins per 5 minutes. The public `/auth/v1/settings` endpoint confirms sign-ups are off and email is the only login method; the other settings are not visible from outside. Session time-box and inactivity limits need a paid plan, so the admin panel enforces them in the browser (SDD 5.4).
+- End-to-end tests use a fake Supabase locally; CI also runs `e2e/live-stack.spec.ts` against a real local stack ([D-031](docs/DECISIONS.md#d-031-end-to-end-tests-use-a-fake-supabase-plus-one-live-stack-test-in-ci)). Docker is still not installed.
 - Initial JavaScript is 126 KB gzipped of the 170 KB budget ([D-030](docs/DECISIONS.md#d-030-the-public-site-uses-supabases-rest-and-realtime-clients-directly)).
 - `main` is protected ([D-026](docs/DECISIONS.md#d-026-protected-main-squash-merges-conventional-commit-titles)).
 - Deferred by the owner: hosting ([D-003](docs/DECISIONS.md#d-003-hosting-deferred)) and the Messenger bot ([D-004](docs/DECISIONS.md#d-004-messenger-bot-deferred)).
@@ -22,13 +23,15 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 - Search, languages, store information: `src/features/search/`, `src/features/i18n/` (translations in `locales/*.json`), `src/features/store-info/`, `src/config/store.ts`
 - Shared: `src/components/`, `src/lib/` (`supabase.ts`, `format.ts`, `database.types.ts`), styles in `src/index.css` and one CSS file per area
 - Tests: `src/**/*.test.ts(x)`, `src/test/`, `e2e/` (`support/fakeSupabase.ts`), `.github/workflows/ci.yml` (end-to-end job now starts a local Supabase)
-- Docs: `docs/SRS.md` (traceability 6.1), `docs/SDD.md` (2.1, 2.2, E3), `docs/DECISIONS.md` (D-030, D-031), `docs/TRD.md`, `docs/ARCHITECTURE.md` (6), `docs/BRIEF.md`, `README.md`, `CHANGELOG.md`
+- Docs: `docs/SRS.md` (traceability 6.1), `docs/SDD.md` (2.1, 2.2, E3), `docs/DECISIONS.md` (D-030 to D-032), `docs/TRD.md`, `docs/ARCHITECTURE.md` (6), `docs/BRIEF.md`, `README.md`, `CHANGELOG.md`
 
 ## 4. Changes Made
 
 - Step 5, public catalog, in one pull request: everything in section 2 above, 69 unit tests and 51 end-to-end tests (phone and desktop sizes), all passing locally in Edge.
 - Built store information and how to order (FR-22 to FR-26) in this step too, because the hero must say where the store is and how to order. FAQ, contact form, legal pages, cookie banner, theme toggle, back to top, scroll progress and print styles stay in step 8.
 - Visual check with screenshots in light and dark, English and Korean, phone and desktop. "Last updated" moved under the Menu heading so the floating button never covers it.
+- Step 5 merged (#5); the live-stack tests passed in CI on their first run.
+- Staging set up through the Supabase connector (D-032). Verified there: access rules as a visitor, security advisor, the site loading real data, and a database change showing on an open page 1.1 seconds after the API showed it (from the development PC).
 
 ## 5. Failed Attempts
 
@@ -38,10 +41,12 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 - Playwright's `test.skip(({}, testInfo) => ...)` is not allowed: the condition gets fixtures only. The live-stack test skips on `isMobile` instead.
 - Suspected that a quick remount would reuse a closing Realtime channel with the same name. It does not: the client drops a channel from its list as soon as it starts leaving. Kept the remount test in `catalog.spec.ts` as a guard.
 - Still true: on Windows, Playwright takes about two minutes to stop a preview server it started itself, so run `npm run preview:e2e` in another terminal first.
+- Stopping a background `npm run preview:e2e` task leaves its Node process holding port 4173. Find it with `Get-NetTCPConnection -LocalPort 4173` and stop it.
+- The Supabase connector stamps migrations with the current time, not the file's version. Fix the version afterwards (D-032), or later `supabase db push` treats them as unknown.
 
 ## 6. Next Steps
 
-1. Merge the step 5 pull request once CI passes. The first real run of `e2e/live-stack.spec.ts` happens there: if it fails, check that `supabase status -o env` still prints `API_URL`, `ANON_KEY` and `SERVICE_ROLE_KEY`.
-2. Step 6, admin panel: login, item editing, availability switch, confirmation modals, photo upload, and the local-only staff account script (D-028). It uses the full supabase-js client, lazy-loaded under `/admin`. Decide there how visitors learn a photo's format: today the card tries WebP, then JPEG, so a JPEG-only photo costs one failed request (D-019). Storing the format with the photo, or always uploading both formats, would remove it.
-3. Owner: create a Supabase staging project (or install Docker Desktop) to see the site with real data; test the m.me link on an Android phone, an iPhone and a desktop (D-014); find fluent Filipino and Korean reviewers for the drafted text (D-008).
+1. Step 6, admin panel: login, item editing, availability switch, confirmation modals, photo upload, and the local-only staff account script (D-028). It uses the full supabase-js client, lazy-loaded under `/admin`. Decide there how visitors learn a photo's format: today the card tries WebP, then JPEG, so a JPEG-only photo costs one failed request (D-019). Storing the format with the photo, or always uploading both formats, would remove it.
+2. Owner: test the m.me link on an Android phone, an iPhone and a desktop (D-014); check live updates on a real phone over mobile data (PRD S4); find fluent Filipino and Korean reviewers for the drafted text (D-008).
+3. Every new migration: after CI passes, apply it to staging as in D-032, until step 10 automates it.
 4. Before the menu passes 1,000 published items, page the item reads (ARCHITECTURE 6).
