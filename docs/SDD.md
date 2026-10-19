@@ -172,7 +172,7 @@ Responses:
 
 Settings: `ALLOWED_ORIGINS` (comma-separated exact origins) and `CONTACT_IP_SALT` (random secret), as Edge Function secrets, or `supabase/functions/.env` locally. Without either, every request is refused. Logs hold the request ID, status and duration only.
 
-The rate limit key is `contact:` plus a SHA-256 hash of the client IP and a secret salt. The IP comes from the first `X-Forwarded-For` entry set by Supabase's edge, and is never stored or logged in plain form.
+The rate limit key is `contact:` plus a SHA-256 hash of the client IP and a secret salt. The IP comes from the first `X-Forwarded-For` entry set by Supabase's edge, and is never stored or logged in plain form. Checked on staging on 2026-10-19: Supabase's edge replaces any `X-Forwarded-For` the caller sends, and the first entry matches `CF-Connecting-IP`, so a visitor cannot dodge the limit by forging the header. Repeat that check if Supabase changes how requests reach functions.
 
 ### 3.3 Messenger webhook (Deferred)
 
