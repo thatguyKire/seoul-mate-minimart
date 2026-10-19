@@ -15,7 +15,7 @@ Website for **Seoul-Mate Minimart**, *your one stop shop* for Korean goodies and
 
 ## Project status
 
-Steps 1 to 6 of 11 are done: requirements, design, repository setup, database, the public menu (live availability, search, English, Filipino and Korean, store information) and the staff panel at `/admin`. The menu shows sample products until the real list arrives. Progress and next steps are in [HANDOFF.md](HANDOFF.md).
+Steps 1 to 6 of 11 are done: requirements, design, repository setup, database, the public menu (live availability, search, English, Filipino and Korean, store information) and the staff panel at `/admin`. Step 8 is under way: the theme toggle, privacy banner, privacy policy and terms, FAQ, print layout and icons are in; the contact form comes next. Step 7, the Messenger bot, waits for the owner. The menu shows sample products until the real list arrives. Progress and next steps are in [HANDOFF.md](HANDOFF.md).
 
 ## Local setup
 
@@ -53,6 +53,7 @@ Server secrets never go in `.env` files for the frontend. Where they live is in 
 | `npm run typecheck` | TypeScript checks |
 | `npm test` | Unit tests (Vitest) |
 | `npm run test:e2e` | End-to-end tests (Playwright) against the production build |
+| `node scripts/generate-icons.mjs` | Render the PNG icons in `public/` from `public/favicon.svg`, after the favicon changes |
 | `npm run check:bundle` | Fails on source maps, secrets, or initial JavaScript over budget |
 | `npm run audit` | Dependency audit, failing on high or critical issues |
 | `npm run db:start` / `db:stop` | Start or stop the local Supabase stack (needs Docker) |
@@ -97,6 +98,7 @@ Not set up yet: hosting is deferred by the owner ([D-003](docs/DECISIONS.md#d-00
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Components, deployment, caching, scaling, monitoring, backups |
 | [docs/BACKEND-SCHEMA.md](docs/BACKEND-SCHEMA.md) | Tables, security policies, functions, storage |
 | [docs/APP-FLOW.md](docs/APP-FLOW.md) | Step-by-step user flows |
+| [docs/UI-UX.md](docs/UI-UX.md) | Design tokens, components and their states, design rules |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Every decision and its reasons |
 | [CHANGELOG.md](CHANGELOG.md) | Released changes by version |
 | [HANDOFF.md](HANDOFF.md) | Where work stands and what comes next |

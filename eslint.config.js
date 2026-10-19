@@ -63,4 +63,11 @@ export default defineConfig([
       globals: globals.node,
     },
   },
+  {
+    // Plain scripts served as they are, such as public/theme-init.js, run in the browser.
+    files: ['public/**/*.js'],
+    languageOptions: {
+      globals: globals.browser,
+    },
+  },
 ]);

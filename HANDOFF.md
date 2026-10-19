@@ -9,43 +9,43 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 ## 2. Current State
 
 - Steps 1 to 6 are done: requirements, design (approved by the owner), repository setup, database, the public catalog, and the staff panel at `/admin`.
-- Staff panel: login (generic refusal message, show-password toggle), non-staff accounts logged straight out, optional two-factor login, logout after 60 idle minutes or 12 hours; items (one-tap stock switch, mark all out of stock, add, edit, delete, reorder, photos processed in the browser); categories (add, rename, reorder, delete refused while in use). English only (D-025). It is its own chunk (69 KB gzipped); the public site's initial JavaScript is 126 KB of 170 KB.
-- Database: five migrations. The fifth, `20261019120000_photo_format.sql`, adds `items.photo_format` (D-034). 97 pgTAP assertions.
-- Staging Supabase project `vebcdxmhoeksxnlyrmqf` (free plan, Tokyo): migrations and sample data from step 4 applied ([D-032](docs/DECISIONS.md#d-032-staging-migrations-applied-through-the-supabase-connector-until-step-10)); the photo format migration is applied after this step's CI passes (Next Steps 1). Its URL and publishable key are in `.env.local` on the development PC (git-ignored). Auth settings set by the owner on 2026-10-19 to match `supabase/config.toml`; sign-ups confirmed off.
-- No staff account exists on staging yet: the owner creates them (README, "Staff accounts").
-- Supabase Auth's login limit answers `429` without `Retry-After`; kept on purpose ([D-033](docs/DECISIONS.md#d-033-staff-login-keeps-supabase-auths-limit-without-retry-after)).
+- Step 8 is split in two pull requests. Part 1 (this one) adds the theme toggle, privacy banner with UTM capture, privacy policy and terms in three languages, FAQ drafts, back to top, scroll progress, page titles, print layout, PNG icons and web manifest, and `docs/UI-UX.md`. Part 2 is the contact form, its Edge Function and the staff messages page.
+- Step 7, the Messenger bot, waits for the owner (D-004).
+- Public site's initial JavaScript is 131 KB of 170 KB; the staff panel and the legal pages are their own chunks.
+- Database: five migrations, 97 pgTAP assertions. Staging (`vebcdxmhoeksxnlyrmqf`, free plan, Tokyo) has all five and the sample data ([D-032](docs/DECISIONS.md#d-032-staging-migrations-applied-through-the-supabase-connector-until-step-10)).
+- Staging has one staff account, the owner's (eriklmao000@gmail.com, `require_mfa` off), added on 2026-10-19.
+- FAQ entries are drafts written from known store facts and marked `todo`; a build with `VITE_APP_ENV=production` fails until the owner approves or replaces them (PRD Q10).
+- Privacy policy and terms are drafts awaiting a lawyer (PRD S7) and fluent reviewers for Filipino and Korean (D-008). Before launch, check that they still match what the site does: Sentry (step 10), the host, any analytics provider, and the contact message retention (PRD Q9, 180 days for now).
 - Deferred by the owner: hosting ([D-003](docs/DECISIONS.md#d-003-hosting-deferred)) and the Messenger bot ([D-004](docs/DECISIONS.md#d-004-messenger-bot-deferred)).
 
 ## 3. Active Files
 
-- Staff panel: `src/features/admin/` (`AdminApp.tsx` routes and login gate; `session/` login state and session limits; `adminData.ts` every read and write; `schemas.ts` form rules; `photos/` photo checks, processing and field; `pages/`; `components/`; `locales/en.json`; `admin.css`)
-- `src/App.tsx` (lazy `/admin` route, new-version fallback), `src/lib/database.types.ts` (full rows, functions), `src/features/catalog/ItemPhoto.tsx` (stored format)
-- `supabase/migrations/20261019120000_photo_format.sql`, `supabase/tests/database/01_structure.test.sql` and `06_constraints.test.sql`
-- `scripts/create-local-staff.mjs` (`npm run db:staff`), `.github/workflows/ci.yml` (end-to-end job creates two local logins)
-- Tests: `src/features/admin/*.test.ts`, `e2e/admin.spec.ts`, `e2e/live-stack.spec.ts`, `e2e/support/fakeSupabase.ts` (now with auth, writes and storage), `e2e/support/photos.ts`
-- Docs: `docs/DECISIONS.md` (D-033 to D-035, D-024 replaced), `docs/SDD.md` (2.1 tree, 2.2, 2.3, E6, 5.4, 5.5, 5.8), `docs/SRS.md` (6.1), `docs/BACKEND-SCHEMA.md` (2.2, 3, 8), `README.md` (Staff accounts), `CHANGELOG.md`
+- Theme: `public/theme-init.js`, `src/features/theme/`, dark tokens under `:root[data-theme='dark']` in `src/index.css`
+- Consent and UTM: `src/features/consent/` (`consent.ts`, `utm.ts`, `CookieBanner.tsx`), started in `src/main.tsx`
+- Layout: `src/components/FloatingStack.tsx` (back to top, Messenger, banner; publishes `--floating-space`), `ScrollProgress.tsx`, `usePageTitle.ts`, `Footer.tsx`, `src/features/site/site.css`, `src/print.css`
+- Content: `src/features/legal/` (content in three languages, `LegalPage.tsx`), `src/features/faq/` (JSON per language, `FaqSection.tsx`)
+- Icons: `public/` (favicon PNGs, Apple touch icon, `manifest.webmanifest`), `scripts/generate-icons.mjs`; FAQ production check in `vite.config.ts`
+- Tests: `src/features/consent/consent.test.ts`, `src/features/site/siteContent.test.ts`, `e2e/site.spec.ts`
+- Docs: `docs/UI-UX.md` (new), `docs/SRS.md` (6.1), `docs/SDD.md` (2.1 tree, 2.2), `docs/DECISIONS.md` (D-036), `README.md`, `CHANGELOG.md`
 
 ## 4. Changes Made
 
-- Step 6 in one pull request: everything in section 2, 85 unit tests, 79 end-to-end tests at phone and desktop sizes plus the CI-only real-stack tests, all passing locally in Edge.
-- Checked D-024 on staging: about 41 wrong logins in a row get `429 over_request_rate_limit`, without `Retry-After`. Recorded as D-033.
-- Settled the photo format question from step 5 with a column (D-034).
-- Visual check of the panel at phone and desktop sizes; rows were reworked so the reorder arrows sit under the switch instead of on a line of their own.
+- Merged step 6 (#7) at the owner's request to move on, and made the owner's staging login a staff account.
+- Step 8 part 1: everything listed in section 2; 97 unit tests and 99 end-to-end tests at phone and desktop sizes pass locally.
+- Visual check of the banner, FAQ, legal pages, dark theme and print output; the banner was made more compact on phones.
 
 ## 5. Failed Attempts
 
-- JavaScript's `String.replace` reads `$$` in the replacement as a single `$`, which silently broke SQL `$$` quotes in an edit script. Use `split(from).join(to)` for text edits.
-- React's lint rule `set-state-in-effect` flags loaders that call a state-setting function from an effect, even after an `await`. Loaders now subscribe to a promise in the effect and reload by bumping a counter.
-- `FormEvent` is deprecated in the current React types; use `SubmitEvent` for form submit handlers.
-- `react-refresh/only-export-components`: keep contexts and hooks (`session/authContext.ts`) apart from component files.
-- The first CI run of the real-stack staff tests failed: every password login got `422`. In `supabase/config.toml`, `[auth.email] enable_signup` is mapped by the CLI to `GOTRUE_EXTERNAL_EMAIL_ENABLED`, so `false` (set in step 4) turned email login off entirely. Set to `true`; `[auth] enable_signup = false` keeps sign-ups closed, and a new real-stack test proves it. Staging was not affected: its settings come from the dashboard.
+- JavaScript's `String.replace` reads `$$` in the replacement as a single `$`, and template literals in edit scripts turn `\n` into real line breaks. Use `split(from).join(to)` and check the result.
+- React's lint rule `set-state-in-effect` flags state set from an effect, even after an `await`. Subscribe with `useSyncExternalStore` (scroll position, theme, consent) or set state in a promise callback.
+- `getByText` on an FAQ question finds the text inside `<summary>`, which cannot take focus; target the `summary` element.
+- jsdom has no `ResizeObserver`; components using it must check that it exists.
 - Still true: on Windows, run `npm run preview:e2e` in another terminal before `npm run test:e2e`, and stop the leftover Node process on port 4173 afterwards (`Get-NetTCPConnection -LocalPort 4173`).
 
 ## 6. Next Steps
 
-1. After this step's CI passes: apply `20261019120000_photo_format.sql` to staging and set its recorded version, as in D-032. Then merge.
-2. Owner: create a first staff account on staging (README, "Staff accounts") and try the panel from a phone, for example with `npm run dev` on the PC and the phone on the same network, until hosting exists. PRD S3: mark an item out of stock in under 10 seconds.
-3. Step 7, the Messenger bot, waits for the owner (D-004). Step 8 is next: contact form and its function, staff messages page, FAQ, legal pages, cookie banner and UTM capture, theme toggle, back to top, scroll progress, print styles, favicons and web manifest.
-4. Owner: test the m.me link on Android, iPhone and desktop (D-014); check live updates on a real phone over mobile data (PRD S4); find fluent Filipino and Korean reviewers (D-008).
-5. Every new migration: after CI passes, apply it to staging as in D-032, until step 10 automates it.
-6. Before the menu passes 1,000 published items, page the item reads (ARCHITECTURE 6).
+1. Merge step 8 part 1 once CI passes and the owner agrees.
+2. Step 8 part 2: contact form (FR-29 to FR-31) with the honeypot and consented UTM values, the `contact` Edge Function (SDD 3.2) with origin check, size limit, schema validation and the rate limit, the staff messages page (FR-32), tests, and deploying the function and its secrets to staging.
+3. Owner: answer PRD Q10 (FAQ) and Q9 (how long to keep contact messages); find a lawyer for the privacy policy and terms; test the m.me link on Android, iPhone and desktop (D-014); check live updates on a real phone over mobile data (PRD S4).
+4. Every new migration: after CI passes, apply it to staging as in D-032, until step 10 automates it.
+5. Before the menu passes 1,000 published items, page the item reads (ARCHITECTURE 6).
