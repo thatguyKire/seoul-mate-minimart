@@ -101,6 +101,17 @@ test('a database change reaches an open page within 5 seconds (FR-06)', async ({
   }
 });
 
+test('nobody can sign up, even straight through the Auth API (FR-34, D-001)', async () => {
+  const anonKey = process.env.VITE_SUPABASE_ANON_KEY ?? '';
+  const response = await fetch(`${url}/auth/v1/signup`, {
+    method: 'POST',
+    headers: { apikey: anonKey, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'new-person@example.test', password: 'Sign-Up-Attempt-1' }),
+  });
+  expect(response.status).toBeGreaterThanOrEqual(400);
+  expect(await response.text()).toMatch(/signup/i);
+});
+
 test('a login that is not staff is refused by the panel (FR-37)', async ({ page }) => {
   await logIn(page, notStaff);
   await expect(

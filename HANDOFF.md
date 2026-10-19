@@ -38,6 +38,7 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 - React's lint rule `set-state-in-effect` flags loaders that call a state-setting function from an effect, even after an `await`. Loaders now subscribe to a promise in the effect and reload by bumping a counter.
 - `FormEvent` is deprecated in the current React types; use `SubmitEvent` for form submit handlers.
 - `react-refresh/only-export-components`: keep contexts and hooks (`session/authContext.ts`) apart from component files.
+- The first CI run of the real-stack staff tests failed: every password login got `422`. In `supabase/config.toml`, `[auth.email] enable_signup` is mapped by the CLI to `GOTRUE_EXTERNAL_EMAIL_ENABLED`, so `false` (set in step 4) turned email login off entirely. Set to `true`; `[auth] enable_signup = false` keeps sign-ups closed, and a new real-stack test proves it. Staging was not affected: its settings come from the dashboard.
 - Still true: on Windows, run `npm run preview:e2e` in another terminal before `npm run test:e2e`, and stop the leftover Node process on port 4173 afterwards (`Get-NetTCPConnection -LocalPort 4173`).
 
 ## 6. Next Steps
