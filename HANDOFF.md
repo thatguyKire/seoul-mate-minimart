@@ -9,7 +9,7 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 ## 2. Current State
 
 - Steps 1 to 6 are done: requirements, design (approved by the owner), repository setup, database, the public catalog, and the staff panel at `/admin`.
-- Step 8 is split in two pull requests. Part 1 (PR #8, CI green, not merged) adds the theme toggle, privacy banner with UTM capture, privacy policy and terms in three languages, FAQ drafts, back to top, scroll progress, page titles, print layout, PNG icons and web manifest, and `docs/UI-UX.md`. Part 2 (branch `feat/contact-form`, stacked on part 1) adds the contact form, the `contact` Edge Function (D-037) and the staff messages page; pushed for review. The function is deployed to staging (version 2, token check off) but refuses every request until its two secrets are set in the dashboard: Supabase paused saving secrets through the connector on 2026-10-19.
+- Step 8 is split in two pull requests. Part 1 (PR #8, CI green, not merged) adds the theme toggle, privacy banner with UTM capture, privacy policy and terms in three languages, FAQ drafts, back to top, scroll progress, page titles, print layout, PNG icons and web manifest, and `docs/UI-UX.md`. Part 2 (branch `feat/contact-form`, stacked on part 1) adds the contact form, the `contact` Edge Function (D-037) and the staff messages page; PR #9, CI green. The function runs on staging (version 2, token check off) with `ALLOWED_ORIGINS=http://localhost:5173` and `CONTACT_IP_SALT`, set by the owner in the dashboard because Supabase paused saving secrets through the connector on 2026-10-19. A test message ("Staging test", safe to delete) went through the dev server on 2026-10-19 and was stored with a hashed rate-limit key.
 - Step 7, the Messenger bot, waits for the owner (D-004).
 - Public site's initial JavaScript is 131 KB of 170 KB; the staff panel and the legal pages are their own chunks.
 - Database: five migrations, 97 pgTAP assertions. Staging (`vebcdxmhoeksxnlyrmqf`, free plan, Tokyo) has all five and the sample data ([D-032](docs/DECISIONS.md#d-032-staging-migrations-applied-through-the-supabase-connector-until-step-10)).
@@ -48,7 +48,7 @@ Build the Seoul-Mate Minimart menu catalog website described in [docs/BRIEF.md](
 ## 6. Next Steps
 
 1. Merge step 8 part 1 (#8) once the owner agrees.
-2. Part 2: merge once CI passes and the owner agrees. Set the staging secrets `ALLOWED_ORIGINS=http://localhost:5173` and a random `CONTACT_IP_SALT` (Edge Functions, Secrets), then send a message from the dev server and read it on the staff messages page.
+2. Part 2 (#9): after #8 is squash-merged, rebase onto `main` (`git rebase --onto main feat/site-features feat/contact-form`), retarget the PR to `main`, and merge once CI passes and the owner agrees. When the site gets a real address, add it to `ALLOWED_ORIGINS`.
 3. Owner: answer PRD Q10 (FAQ) and Q9 (how long to keep contact messages); find a lawyer for the privacy policy and terms; test the m.me link on Android, iPhone and desktop (D-014); check live updates on a real phone over mobile data (PRD S4).
 4. Every new migration: after CI passes, apply it to staging as in D-032, until step 10 automates it.
 5. Before the menu passes 1,000 published items, page the item reads (ARCHITECTURE 6).
