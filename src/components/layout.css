@@ -344,3 +344,116 @@
 .floating-contact:focus-visible {
   background: var(--color-accent-hover);
 }
+
+/* Motion (D-038). The language list grows from its button; its chevron turns. */
+.language-switcher__chevron {
+  transition: transform var(--duration-fast) var(--ease-smooth-out);
+}
+
+.language-switcher__panel:not([hidden]) {
+  transform-origin: top right;
+  animation: dropdown-in var(--duration-fast) var(--ease-smooth-out);
+}
+
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    scale: var(--scale-medium);
+    translate: 0 calc(var(--distance-micro) * -1);
+  }
+}
+
+/*
+ * The mobile menu slides in from the side and out a little faster (MobileMenu waits for the
+ * way out). ::backdrop gets plain values: older browsers do not pass variables to it.
+ */
+.mobile-menu[open] {
+  animation: drawer-in var(--duration-slow) var(--ease-smooth-out);
+}
+
+.mobile-menu[open]::backdrop {
+  animation: backdrop-in 400ms ease-out;
+}
+
+.mobile-menu[data-closing] {
+  animation: drawer-out var(--duration-fast) var(--ease-smooth-out) forwards;
+}
+
+.mobile-menu[data-closing]::backdrop {
+  animation: backdrop-out 250ms ease-out forwards;
+}
+
+@keyframes drawer-in {
+  from {
+    translate: 100% 0;
+  }
+}
+
+@keyframes drawer-out {
+  to {
+    translate: 100% 0;
+  }
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes backdrop-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* The Messenger button presses down like a key; on desktop it rises a little on hover. */
+.floating-contact {
+  transition:
+    background-color var(--duration-quick) var(--ease-out),
+    translate var(--duration-micro) var(--ease-out),
+    box-shadow var(--duration-micro) var(--ease-out);
+}
+
+/* Desktop with a mouse: an underline slides under the hovered link; the letter mark tilts. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .site-nav__link {
+    position: relative;
+  }
+
+  .site-nav__link::after {
+    content: '';
+    position: absolute;
+    inset: auto 0.75rem 0.5rem;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--pink-500);
+    scale: 0 1;
+    transform-origin: left;
+    transition: scale var(--duration-fast) var(--ease-smooth-out);
+  }
+
+  .site-nav__link:hover::after,
+  .site-nav__link:focus-visible::after {
+    scale: 1 1;
+  }
+
+  .wordmark__mark {
+    transition: rotate var(--duration-fast) var(--ease-bounce);
+  }
+
+  .wordmark:hover .wordmark__mark,
+  .wordmark:focus-visible .wordmark__mark {
+    rotate: -8deg;
+  }
+
+  .floating-contact:hover {
+    translate: 0 -2px;
+    box-shadow: 0 5px 0 var(--navy-900);
+  }
+}
+
+.floating-contact:active {
+  translate: 0 2px;
+  box-shadow: 0 1px 0 var(--navy-900);
+}

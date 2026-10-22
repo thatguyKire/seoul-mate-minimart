@@ -36,7 +36,9 @@ All notable changes to this project are recorded here. The format follows [Keep 
 - Back to top button, a scroll progress bar on the menu and legal pages, page titles, a print layout for the menu, PNG icons, an Apple touch icon and a web manifest.
 - Contact form for visitors without Messenger, with inline errors, a summary and a thank-you message; the `contact` Edge Function checks origin, size and fields, drops bots through a hidden field, and allows 5 messages per address per 10 minutes.
 - Staff messages page: contact form messages, newest first, with tap-to-call and email links.
+- Motion: on desktop, the hero rises in, sections and menu cards fade up as they scroll into view, and cards lift and swing on hover; on every screen, the mobile menu slides, FAQ answers open smoothly, the privacy banner rises and drops away, buttons give press feedback, the theme cross-fades and the thank-you check draws itself. All of it is off for visitors who prefer reduced motion.
 
 ### Changed
 
+- Printing the menu leaves out the contact form, as it does the other sections.
 - Items record their photo format, so the menu asks for the right files (migration `20261019120000_photo_format.sql`).

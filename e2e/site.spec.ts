@@ -208,6 +208,7 @@ test('printing the menu keeps names, prices and stock only (FR-68)', async ({ pa
     '.item-photo',
     '.faq',
     '.visit',
+    '.contact',
   ]) {
     await expect(page.locator(selector).first(), selector).toBeHidden();
   }

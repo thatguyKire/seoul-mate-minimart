@@ -1,6 +1,7 @@
 import { useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageLinks } from '../features/i18n/LanguageLinks';
+import { motionMs } from '../features/motion/motion';
 import { ThemeToggle } from '../features/theme/ThemeToggle';
 import { Icon } from './Icon';
 import { sections, useSectionHref } from './sections';
@@ -8,16 +9,28 @@ import { sections, useSectionHref } from './sections';
 /**
  * Navigation on small screens (FR-61). A modal dialog: the rest of the page is inert while
  * it is open, so keyboard focus stays inside, and Escape closes it. A link tap closes it too.
+ * It slides out before closing, unless the visitor prefers reduced motion (D-038).
  */
 export function MobileMenu() {
   const { t } = useTranslation();
   const sectionHref = useSectionHref();
   const dialog = useRef<HTMLDialogElement>(null);
+  const closing = useRef<number | undefined>(undefined);
   const [open, setOpen] = useState(false);
   const titleId = useId();
 
   function close() {
-    dialog.current?.close();
+    const element = dialog.current;
+    if (!element?.open || element.dataset.closing !== undefined) return;
+    const wait = motionMs('--duration-fast');
+    if (wait === 0) {
+      element.close();
+      return;
+    }
+    element.dataset.closing = '';
+    closing.current = window.setTimeout(() => {
+      element.close();
+    }, wait);
   }
 
   return (
@@ -39,7 +52,15 @@ export function MobileMenu() {
         ref={dialog}
         className="mobile-menu"
         aria-labelledby={titleId}
+        onCancel={(event) => {
+          // Escape: slide out first, as the close button does.
+          event.preventDefault();
+          close();
+        }}
         onClose={() => {
+          // However it closed, a slide-out still waiting must not close the next opening.
+          window.clearTimeout(closing.current);
+          if (dialog.current) delete dialog.current.dataset.closing;
           setOpen(false);
         }}
       >

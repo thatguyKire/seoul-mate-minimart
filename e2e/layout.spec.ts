@@ -139,13 +139,22 @@ test('the floating contact button opens Messenger and stays clear of the footer 
   await expect(button).toHaveAttribute('href', 'https://m.me/61594474910928');
   await expect(button).toHaveAccessibleName('Message us on Messenger');
 
-  await page.keyboard.press('End');
-  await page.evaluate(() => {
-    window.scrollTo(0, document.body.scrollHeight);
-  });
-  const floating = await button.boundingBox();
-  const copyright = await page.locator('.site-footer__copyright').boundingBox();
-  expect(floating && copyright && copyright.y + copyright.height <= floating.y).toBe(true);
+  // The contact form loads after the page and makes it taller, so wait for it, then measure at
+  // the very bottom until the layout has settled.
+  await expect(page.locator('#contact')).toBeAttached();
+  const copyright = page.locator('.site-footer__copyright');
+  await expect
+    .poll(async () => {
+      await page.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+      const floatingBox = await button.boundingBox();
+      const copyrightBox = await copyright.boundingBox();
+      return Boolean(
+        floatingBox && copyrightBox && copyrightBox.y + copyrightBox.height <= floatingBox.y,
+      );
+    })
+    .toBe(true);
 });
 
 test('before consent the page contacts only the site and Supabase (NFR-PRIV-02)', async ({
