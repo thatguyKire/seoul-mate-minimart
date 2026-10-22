@@ -193,7 +193,7 @@ Every feature works on mobile and desktop, in light and dark mode, and with keyb
 | Vague hero text | Say what the store sells, where it is, and how to order |
 | Emoji as icons | One consistent SVG icon set |
 | Em dashes in any copy | Commas, colons or periods |
-| Showy scroll animations or cursor effects | Short, functional transitions that switch off under `prefers-reduced-motion` |
+| Cursor-following effects, or entrances and scroll reveals on phones | Short motion that switches off under `prefers-reduced-motion`. On a desktop with a mouse, a one-time hero entrance, scroll reveals and hover lifts are allowed (changed by the owner on 2026-10-22, [D-038](DECISIONS.md#d-038-richer-motion-on-desktop-tap-driven-motion-on-phones)) |
 | AI-generated photos or generic AI-sounding copy | Real store photos (neutral "Photo coming soon" placeholders until provided) and plain, specific copy |
 | "Made with AI" tags or generator credits | No such tags anywhere in the UI or page metadata |
 

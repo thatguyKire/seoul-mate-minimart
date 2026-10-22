@@ -25,6 +25,20 @@
   border-color: var(--color-text);
 }
 
+/* After a click, the new sun or moon spins in (D-038). */
+.theme-toggle[data-swapped] .theme-toggle__icon {
+  animation: icon-in var(--duration-fast) var(--ease-in-out);
+}
+
+@keyframes icon-in {
+  from {
+    opacity: 0;
+    scale: 0.25;
+    rotate: -90deg;
+    filter: blur(var(--blur-small));
+  }
+}
+
 /* In the header: the icon only, with the label kept for screen readers. */
 .theme-toggle--compact {
   width: 2.75rem;
@@ -63,6 +77,28 @@
   background: var(--color-bg);
   color: var(--color-text);
   box-shadow: 0 4px 0 var(--color-border);
+  animation: banner-in var(--duration-medium) var(--ease-smooth-out);
+}
+
+/* The banner rises in, and drops away faster once a choice is made (CookieBanner waits). */
+.consent[data-leaving] {
+  animation: banner-out var(--duration-fast) var(--ease-smooth-out) forwards;
+}
+
+@keyframes banner-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--distance-toast);
+    scale: var(--scale-medium);
+  }
+}
+
+@keyframes banner-out {
+  to {
+    opacity: 0;
+    translate: 0 var(--distance-toast);
+    scale: var(--scale-medium);
+  }
 }
 
 .consent__title {
@@ -116,6 +152,17 @@
   color: var(--color-text);
   cursor: pointer;
   box-shadow: 0 3px 0 var(--color-border);
+  animation: pop-in var(--duration-fast) var(--ease-smooth-out);
+  transition:
+    background-color var(--duration-quick) var(--ease-out),
+    translate var(--duration-micro) var(--ease-out),
+    box-shadow var(--duration-micro) var(--ease-out);
+}
+
+/* Presses down like the Messenger button below it. */
+.floating-top:active {
+  translate: 0 2px;
+  box-shadow: 0 1px 0 var(--color-border);
 }
 
 .floating-top:hover,
@@ -183,7 +230,7 @@
 }
 
 .faq__chevron {
-  transition: transform 120ms ease;
+  transition: transform var(--duration-fast) var(--ease-smooth-out);
 }
 
 .faq__item[open] .faq__chevron {
@@ -194,6 +241,38 @@
   max-width: 65ch;
   padding: 0 0.5rem 1.25rem;
   color: var(--color-text-muted);
+}
+
+/* An answer slides down into place (D-038); where browsers can, the height eases open and shut. */
+.faq__item[open] .faq__answer {
+  animation: answer-in var(--duration-slow) var(--ease-smooth-out);
+}
+
+@keyframes answer-in {
+  from {
+    opacity: 0;
+    translate: 0 calc(var(--distance-base) * -1);
+  }
+}
+
+@supports (interpolate-size: allow-keywords) and selector(::details-content) {
+  @media (prefers-reduced-motion: no-preference) {
+    .faq__item {
+      interpolate-size: allow-keywords;
+    }
+
+    .faq__item::details-content {
+      block-size: 0;
+      overflow-y: clip;
+      transition:
+        block-size var(--duration-slow) var(--ease-smooth-out),
+        content-visibility var(--duration-slow) allow-discrete;
+    }
+
+    .faq__item[open]::details-content {
+      block-size: auto;
+    }
+  }
 }
 
 /* Legal pages (FR-58, FR-59). */
@@ -327,4 +406,25 @@
 
 .contact__thanks:focus {
   outline: none;
+}
+
+/* The thank-you rises in and its check draws itself (D-038). The path is about 20 units long. */
+.contact__thanks {
+  animation: fade-up var(--duration-slow) var(--ease-smooth-out);
+}
+
+.contact__thanks .icon {
+  animation: pop-in var(--duration-very-slow) var(--ease-bounce);
+}
+
+.contact__thanks .icon path {
+  stroke-dasharray: 21;
+  animation: draw-check var(--duration-very-slow) var(--ease-smooth-out) var(--duration-micro)
+    backwards;
+}
+
+@keyframes draw-check {
+  from {
+    stroke-dashoffset: 21;
+  }
 }

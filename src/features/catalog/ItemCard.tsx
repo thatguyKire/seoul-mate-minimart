@@ -4,6 +4,7 @@ import { showSampleLabels } from '../../lib/env';
 import { formatPrice } from '../../lib/format';
 import { useLocale } from '../i18n/localeContext';
 import { langAttribute, localizedText } from '../i18n/localizedText';
+import { reveal } from '../motion/motion';
 import { ItemPhoto } from './ItemPhoto';
 import type { Item } from './types';
 
@@ -18,7 +19,7 @@ export function ItemCard({ item }: { item: Item }) {
   const description = localizedText(item, 'description', locale);
 
   return (
-    <li className={item.is_available ? 'item-card' : 'item-card item-card--out'}>
+    <li ref={reveal} className={item.is_available ? 'item-card' : 'item-card item-card--out'}>
       <ItemPhoto
         key={item.photo_path ?? 'none'}
         path={item.photo_path}

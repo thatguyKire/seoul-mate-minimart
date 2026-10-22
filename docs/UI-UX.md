@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Status | 1.0 |
-| Last updated | 2026-10-19 |
+| Last updated | 2026-10-22 |
 
 This document owns the **design**: tokens, components, their states, and how the design rules in [BRIEF.md, section 5](BRIEF.md#5-design-rules) are kept. Behavior and requirement IDs are in [SRS.md](SRS.md); how each part is built is in [SDD.md](SDD.md). The tokens live in `src/index.css`; component styles sit next to their components.
 
@@ -65,6 +65,42 @@ Scale: ratio 1.25 from 16px (`--step--1` 14px to `--step-4`, fluid up to 56px fo
 
 Breakpoints: 40rem (640px) for three menu columns and one-line staff rows, 48rem (768px) for wider sections, 52rem (832px) for the full header navigation, 64rem (1024px) for four menu columns.
 
+### 2.4 Motion
+
+Tokens from the [transitions.dev](https://transitions.dev) motion scale ([D-038](DECISIONS.md#d-038-richer-motion-on-desktop-tap-driven-motion-on-phones)). Shared keyframes and the scroll reveal are in `src/features/motion/`; each component's motion sits with its styles.
+
+| Token | Value | Used for |
+|---|---|---|
+| `--duration-stagger` | 40ms | Gap between items in a cascade |
+| `--duration-micro` | 80ms | Press feedback, the check's delay |
+| `--duration-quick` | 150ms | Hover colors |
+| `--duration-fast` | 250ms | Dropdown open, menu and banner exits, icon swap, chevrons, card lift |
+| `--duration-medium` | 350ms | Banner entrance, theme cross-fade |
+| `--duration-slow` | 400ms | Mobile menu entrance, FAQ answer, thank-you |
+| `--duration-very-slow` | 500ms | Hero entrance, scroll reveals, the drawn check |
+| `--ease-smooth-out` | cubic-bezier(0.22, 1, 0.36, 1) | Nearly everything that moves |
+| `--ease-bounce` | cubic-bezier(0.34, 1.36, 0.64, 1) | Letter mark tilt, check pop |
+| `--distance-micro` to `--distance-toast` | 4, 8, 12, 16px | Card lift, answer slide, reveals, banner |
+| `--scale-medium`, `--scale-pop` | 0.97, 0.9 | Press and dropdown, pop-ins |
+
+Where motion plays:
+
+| Where | Desktop with a mouse | Touch screens |
+|---|---|---|
+| Hero | Lines rise in one after another, with a slight blur | None |
+| Sections, category headings, item cards | Fade up once on scrolling into view, cascading | None |
+| Category filter | The chosen category's cards come in afresh | None |
+| Item card hover | Lifts, swings from its top edge like a hanging tag, photo leans in | None |
+| Header | Underline slides under the hovered link; letter mark tilts; language list grows from its button | Same for the language list |
+| Mobile menu | Slides in from the side, out a little faster | Same |
+| FAQ | Answer slides down; the height eases where the browser can | Same |
+| Privacy banner | Rises in; drops away before the choice is saved | Same |
+| Buttons, back to top, Messenger button | Press feedback; the Messenger button rises on hover | Press feedback |
+| Theme toggle | Page cross-fades between themes; the sun or moon spins in | Same |
+| Contact thank-you | Rises in; the check draws itself | Same |
+
+"Desktop with a mouse" is `(hover: hover) and (pointer: fine)`, also set as `html[data-motion="rich"]`. Starting states that hide something live only in keyframes or behind that attribute, so with motion off, or when printing, everything shows.
+
 ## 3. Components and states
 
 Every interactive element has a hover style and the same style on `:focus-visible` (FR-67), plus a 3px focus outline.
@@ -100,7 +136,7 @@ How each rule from [BRIEF.md, section 5](BRIEF.md#5-design-rules) is kept, and w
 | Vague hero text | "Korean snacks, noodles and skincare in Masbate City", then how to order | Review |
 | Emoji as icons | One drawn SVG icon set (`src/components/Icon.tsx`), 24px grid, 2px round strokes | Review |
 | Em dashes in copy | Commas, colons, periods | `translations.test.ts`, `siteContent.test.ts`, `layout.spec.ts` |
-| Showy scroll or cursor effects | 120ms color and transform transitions, skeleton pulse, spinner; all off under `prefers-reduced-motion` | Review |
+| Cursor effects; entrances and scroll reveals on phones | The motion in [2.4](#24-motion): rich only on a desktop with a mouse, tap-driven on touch screens, all off under `prefers-reduced-motion` | `motion.spec.ts`, `motion.test.ts` |
 | AI-generated photos or generic copy | "Photo coming soon" placeholders; plain, specific copy | Review |
 | "Made with AI" tags | None in the interface or page metadata | Review |
 

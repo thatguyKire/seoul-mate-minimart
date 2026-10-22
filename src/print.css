@@ -34,6 +34,7 @@
   .how-to-order,
   .faq,
   .visit,
+  .contact,
   .site-footer,
   .floating-stack,
   button {
@@ -42,6 +43,12 @@
 
   body {
     font-size: 11pt;
+  }
+
+  /* Items not yet scrolled to are still waiting to fade in on screen (D-038): print them. */
+  [data-reveal] {
+    opacity: 1 !important;
+    translate: none !important;
   }
 
   .section {
