@@ -41,6 +41,7 @@
   --color-skeleton: #eee6ec;
   --color-footer: var(--navy-900);
   --color-on-footer: var(--white);
+  --color-lift-shadow: rgb(30 43 94 / 0.4);
 
   --font-body: 'Nunito Variable', 'Noto Sans KR Variable', system-ui, sans-serif;
   --font-display: 'Fredoka Variable', 'Noto Sans KR Variable', system-ui, sans-serif;
@@ -59,6 +60,27 @@
 
   --header-height: 4rem;
   --gutter: 1rem;
+
+  /* Motion, from the transitions.dev scale (D-038). Where each is used: UI-UX 2.4. */
+  --duration-stagger: 40ms;
+  --duration-micro: 80ms;
+  --duration-quick: 150ms;
+  --duration-fast: 250ms;
+  --duration-medium: 350ms;
+  --duration-slow: 400ms;
+  --duration-very-slow: 500ms;
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: ease-in-out;
+  --ease-out: ease-out;
+  --ease-bounce: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --distance-micro: 4px;
+  --distance-base: 8px;
+  --distance-medium: 12px;
+  --distance-toast: 16px;
+  --scale-medium: 0.97;
+  --scale-pop: 0.9;
+  --blur-small: 2px;
+  --blur-medium: 3px;
 }
 
 :root[data-theme='dark'] {
@@ -85,6 +107,7 @@
   --color-skeleton: #2b335e;
   --color-footer: #0c1027;
   --color-on-footer: #f6eef3;
+  --color-lift-shadow: rgb(0 0 0 / 0.55);
 }
 
 @media (min-width: 48rem) {
@@ -224,9 +247,10 @@ main:focus {
   text-decoration: none;
   cursor: pointer;
   transition:
-    background-color 120ms ease,
-    color 120ms ease,
-    border-color 120ms ease;
+    background-color var(--duration-quick) var(--ease-out),
+    color var(--duration-quick) var(--ease-out),
+    border-color var(--duration-quick) var(--ease-out),
+    scale var(--duration-micro) var(--ease-out);
 }
 
 .button--primary {
@@ -344,6 +368,7 @@ main:focus {
   gap: 0.75rem;
 }
 
+/* NFR-ACC-04: no motion at all for visitors who ask for less (D-038). */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -351,5 +376,10 @@ main:focus {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+
+  /* Kept apart: a browser that does not know a pseudo-element drops the whole rule. */
+  ::backdrop {
+    animation: none !important;
   }
 }

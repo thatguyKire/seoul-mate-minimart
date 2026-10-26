@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Icon } from '../../components/Icon';
 import { showSampleLabels } from '../../lib/env';
 import { useLocale } from '../i18n/localeContext';
+import { reveal, revealEach } from '../motion/motion';
 import { faq } from './faqContent';
 
 /**
@@ -15,8 +16,10 @@ export function FaqSection() {
   return (
     <section id="faq" className="section faq" aria-labelledby="faq-title">
       <div className="container">
-        <h2 id="faq-title">{t('faq.title')}</h2>
-        <div className="faq__list">
+        <h2 ref={reveal} id="faq-title">
+          {t('faq.title')}
+        </h2>
+        <div ref={revealEach} className="faq__list">
           {faq[locale].map((entry) => (
             <details key={entry.question} className="faq__item">
               <summary className="faq__question">

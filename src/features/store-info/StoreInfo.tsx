@@ -3,6 +3,7 @@ import { Icon } from '../../components/Icon';
 import { store } from '../../config/store';
 import { formatWeekday } from '../../lib/format';
 import { useLocale } from '../i18n/localeContext';
+import { reveal, revealEach } from '../motion/motion';
 import { CopyButton } from './CopyButton';
 import { formatHours } from './hours';
 
@@ -18,8 +19,10 @@ export function StoreInfo() {
   return (
     <section id="visit" className="section visit" aria-labelledby="visit-title">
       <div className="container">
-        <h2 id="visit-title">{t('visit.title')}</h2>
-        <div className="visit__grid">
+        <h2 ref={reveal} id="visit-title">
+          {t('visit.title')}
+        </h2>
+        <div ref={revealEach} className="visit__grid">
           <div className="visit__block">
             <h3 id="hours-title" className="visit__heading">
               <Icon name="clock" />

@@ -1,4 +1,4 @@
-import { useDeferredValue, useMemo, useState } from 'react';
+import { Fragment, useDeferredValue, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
 import { Icon } from '../../components/Icon';
@@ -7,6 +7,7 @@ import { showSampleLabels } from '../../lib/env';
 import { formatDateTime } from '../../lib/format';
 import { useLocale } from '../i18n/localeContext';
 import { langAttribute, localizedText } from '../i18n/localizedText';
+import { reveal } from '../motion/motion';
 import { buildSearchIndex, normalize } from '../search/searchIndex';
 import { ItemCard, SkeletonCard } from './ItemCard';
 import { buildMenuView, lastAvailabilityChange } from './menuView';
@@ -129,21 +130,24 @@ function MenuItems({ menu, query }: { menu: Menu; query: string }) {
         </div>
       )}
 
-      {view.groups.map((group) => {
-        const name = localizedText(group.category, 'name', locale);
-        return (
-          <div key={group.category.id} className="menu__group">
-            <h3 className="menu__category" {...langAttribute(name, locale)}>
-              {name.text}
-            </h3>
-            <ul className="item-grid">
-              {group.items.map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
-            </ul>
-          </div>
-        );
-      })}
+      {/* Keyed by category, so choosing one brings its cards in afresh (D-038). */}
+      <Fragment key={categorySlug ?? ''}>
+        {view.groups.map((group) => {
+          const name = localizedText(group.category, 'name', locale);
+          return (
+            <div key={group.category.id} className="menu__group">
+              <h3 ref={reveal} className="menu__category" {...langAttribute(name, locale)}>
+                {name.text}
+              </h3>
+              <ul className="item-grid">
+                {group.items.map((item) => (
+                  <ItemCard key={item.id} item={item} />
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </Fragment>
     </>
   );
 }

@@ -13,6 +13,9 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',
+    // Tests check what the page does, not how it moves, so they run with reduced motion and
+    // never race an animation. e2e/motion.spec.ts switches motion back on (D-038).
+    reducedMotion: 'reduce',
   },
   projects: [
     { name: 'mobile', use: { ...devices['Pixel 7'], ...browser } },

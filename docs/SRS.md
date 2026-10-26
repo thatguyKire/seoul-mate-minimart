@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Status | 1.0, approved by the owner on 2026-10-18 |
-| Last updated | 2026-10-19 |
+| Last updated | 2026-10-22 |
 | Structure | Based on ISO/IEC/IEEE 29148 |
 
 ## 1. Introduction
@@ -300,7 +300,7 @@ Deferred by the owner ([D-004](DECISIONS.md#d-004-messenger-bot-deferred)). Kept
 | NFR-ACC-01 | The site meets WCAG 2.2 level AA and uses semantic HTML. |
 | NFR-ACC-02 | Every feature works with keyboard only, on mobile and desktop, in light and dark themes. |
 | NFR-ACC-03 | Text and controls meet AA contrast in both themes. |
-| NFR-ACC-04 | Animations are short and functional, and are switched off when the visitor prefers reduced motion. |
+| NFR-ACC-04 | Motion is short (500 ms or less per element, plus a cascade of at most 320 ms), plays once, and never follows the cursor. Touch screens get tap-driven transitions only, with no entrances or scroll reveals. All motion is switched off when the visitor prefers reduced motion, and nothing waits for an animation then ([D-038](DECISIONS.md#d-038-richer-motion-on-desktop-tap-driven-motion-on-phones)). |
 | NFR-ACC-05 | Text in a language other than the page's language, such as an English fallback on the Korean page, is marked with its own `lang` attribute. |
 | NFR-ACC-06 | Touch targets are at least 24 by 24 CSS pixels, and primary actions at least 44 by 44. |
 | NFR-ACC-07 | A focused element is never hidden by the sticky header, floating buttons or cookie banner. |
@@ -424,6 +424,6 @@ Manual screen reader checks for FR-60 to FR-62 are still to do (step 11).
 | NFR-SEC-01 to NFR-SEC-03 | Database access | [5.3](SDD.md#53-database-access) | `supabase/tests/database` files 01 to 04 (pgTAP), run in CI ([BACKEND-SCHEMA 8](BACKEND-SCHEMA.md#8-tests)) |
 | NFR-SEC-04 to NFR-SEC-18 | Other security | [5.2](SDD.md#52-threat-model-stride) and [5.4 to 5.9](SDD.md#54-staff-sessions) | Lint rules, CI dependency audit, signature and maintenance checks (`check:maintained`), bundle secret scan (`scripts/check-bundle.test.mjs`), headers and policy in `hosting/headers.test.ts` and `e2e/security.spec.ts`, with `e2e/support/test.ts` failing every end-to-end test on a policy violation, injection tests in `security.spec.ts`, `catalog.spec.ts`, `contact.spec.ts`, `live-stack.spec.ts` and `handler.test.ts`. NFR-SEC-13 by design (D-022). NFR-SEC-09, -12, -16 and -17 for the contact function in `handler.test.ts` and `live-stack.spec.ts`. NFR-SEC-14 in `04_staff_access.test.sql` and `live-stack.spec.ts`. NFR-SEC-16 for login: Supabase Auth, `429` without `Retry-After` (D-033) |
 | NFR-PERF-01 to NFR-PERF-06 | Performance | [2.1](SDD.md#21-frontend-structure); ARCHITECTURE [5](ARCHITECTURE.md#5-caching) and [6](ARCHITECTURE.md#6-scaling) | Lighthouse CI (planned); bundle size check in CI, `check-bundle.mjs` (NFR-PERF-02); search benchmark in `searchIndex.test.ts` (NFR-PERF-05) |
-| NFR-ACC-01 to NFR-ACC-07 | Accessibility | [2.2](SDD.md#22-public-site-modules) layout and i18n; [UI-UX.md](UI-UX.md) | axe checks in `layout.spec.ts`, `site.spec.ts` and `admin.spec.ts` (English and Korean, light and dark, phone and desktop); fallback `lang` in `App.test.tsx` (NFR-ACC-05); manual audit |
+| NFR-ACC-01 to NFR-ACC-07 | Accessibility | [2.2](SDD.md#22-public-site-modules) layout and i18n; [UI-UX.md](UI-UX.md) | axe checks in `layout.spec.ts`, `site.spec.ts`, `admin.spec.ts` and `motion.spec.ts` (English and Korean, light and dark, phone and desktop); motion on desktop, phones and with reduced motion in `motion.spec.ts` and `motion.test.ts` (NFR-ACC-04); fallback `lang` in `App.test.tsx` (NFR-ACC-05); manual audit |
 | NFR-PRIV-01 to NFR-PRIV-05 | Privacy | [5.7](SDD.md#57-secrets), [6](SDD.md#6-error-handling-and-logging), [7.3](SDD.md#73-cookie-consent-analytics-and-utm) | Hosts contacted before consent in `layout.spec.ts` (NFR-PRIV-02); storage before consent in `consent.test.ts` and `site.spec.ts` (NFR-PRIV-04); Sentry scrubbing test; legal review |
 | NFR-REL-01 to NFR-REL-05 | Reliability | [6](SDD.md#6-error-handling-and-logging); ARCHITECTURE [7](ARCHITECTURE.md#7-error-tracking-and-monitoring) and [8](ARCHITECTURE.md#8-backups-and-recovery) | Menu error state in `catalog.spec.ts` (NFR-REL-01); restore drill; uptime monitor |

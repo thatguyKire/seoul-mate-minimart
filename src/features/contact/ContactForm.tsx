@@ -20,6 +20,7 @@ import { env } from '../../lib/env';
 import { useConsent } from '../consent/consent';
 import { consentedUtm } from '../consent/utm';
 import { useLocale } from '../i18n/localeContext';
+import { revealEach } from '../motion/motion';
 
 type Failure = 'rateLimited' | 'server';
 
@@ -94,7 +95,7 @@ export function ContactForm() {
 
   return (
     <section id="contact" className="section contact" aria-labelledby="contact-title">
-      <div className="container">
+      <div ref={revealEach} className="container">
         <h2 id="contact-title">{t('contactForm.title')}</h2>
         {sentTo !== null ? (
           // The success message replaces the form (FR-31).

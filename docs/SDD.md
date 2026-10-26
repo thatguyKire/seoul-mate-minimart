@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Status | 1.0, approved by the owner on 2026-10-18 |
-| Last updated | 2026-10-19 |
+| Last updated | 2026-10-22 |
 | Structure | Based on IEEE 1016 |
 
 This document owns **how each part is built**. It refers to requirement IDs in [SRS.md](SRS.md) and decisions in [DECISIONS.md](DECISIONS.md) instead of restating them.
@@ -21,7 +21,7 @@ src/
   app/          App shell, router, providers (i18n, theme, consent, Sentry)
   components/   Layout and shared UI
   features/
-    catalog/  search/  i18n/  store-info/  contact/  faq/  consent/  legal/
+    catalog/  search/  i18n/  store-info/  contact/  faq/  consent/  legal/  motion/
     admin/      Loaded lazily, only under /admin
   lib/          Supabase client, Sentry setup, formatting, shared Zod schemas
   config/       Store facts (address, hours, phone, links)
@@ -90,6 +90,7 @@ flowchart LR
 | consent | Privacy banner in the floating stack, stored choice (kept in memory when storage is blocked), footer "Privacy choices" to change it. Captures the five UTM values at start-up, keeps them in memory until Accept, then in `sessionStorage`; Decline discards them ([section 7.3](#73-cookie-consent-analytics-and-utm)). No analytics provider is chosen yet ([D-036](DECISIONS.md#d-036-the-privacy-banner-comes-before-any-analytics)); when one is, it loads only after Accept, and never under `/admin` | FR-54 to FR-57, NFR-PRIV-04 |
 | legal | Privacy and terms pages from structured per-language content (headings, paragraphs, lists) rendered as React elements, never as raw HTML. Each shows its last updated date, a note that it awaits legal review, and the "English version prevails" note ([D-009](DECISIONS.md#d-009-legal-pages-in-three-languages-english-prevails)). Routes `/:locale/privacy` and `/:locale/terms`; store facts are filled in from `config/store.ts` | FR-58, FR-59 |
 | layout | Sticky header with `scroll-padding-top` so anchored headings are never hidden. Mobile menu as a dialog with focus trap. Skip link, scroll progress bar, back to top. One `FloatingStack` column holds back to top, the contact button and the privacy banner, so they cannot overlap; its height is published as `--floating-space` for `scroll-padding-bottom` and the footer's bottom padding. `theme-init.js` sets `data-theme` on `<html>` before first paint from the saved choice or the system setting, and the app follows system changes until the visitor chooses. Tab titles name each page. A print stylesheet keeps item names, prices and stock only. Icons: SVG favicon, 32px PNG, Apple touch icon and web manifest, rendered by `scripts/generate-icons.mjs` | FR-60 to FR-69, NFR-ACC-04, NFR-ACC-07 |
+| motion | Motion tokens in `index.css`, shared keyframes in `motion.css`. `motion.ts` sets `html[data-motion="rich"]` on desktops with a mouse when the visitor has not asked for reduced motion, and offers `reveal` and `revealEach` ref callbacks: one shared IntersectionObserver marks elements pending, then shown the first time they scroll into view, cascading 40ms apart up to 320ms. Exits that need a wait (mobile menu, privacy banner) read the duration with `motionMs`, which is 0 under reduced motion. No animation library ([UI-UX 2.4](UI-UX.md#24-motion), [D-038](DECISIONS.md#d-038-richer-motion-on-desktop-tap-driven-motion-on-phones)) | NFR-ACC-04 |
 
 ### 2.3 Admin panel modules
 

@@ -32,4 +32,4 @@ export const test = base.extend<{ cspViolations: string[] }>({
 });
 
 export { expect };
-export type { Page } from '@playwright/test';
+export type { Locator, Page } from '@playwright/test';

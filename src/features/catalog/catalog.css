@@ -360,3 +360,49 @@
   flex-wrap: wrap;
   gap: 0.75rem;
 }
+
+/*
+ * Desktop with a mouse (D-038): a card lifts, the tag swings from its top edge as if brushed on
+ * the shelf, and the photo leans in. The rich-motion transition list repeats the scroll
+ * reveal's from motion.css, which this rule replaces.
+ */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .item-card {
+    transform-origin: 50% 0;
+    transition:
+      transform var(--duration-fast) var(--ease-smooth-out),
+      box-shadow var(--duration-fast) var(--ease-smooth-out);
+  }
+
+  html[data-motion='rich'] .item-card {
+    transition:
+      opacity var(--duration-very-slow) var(--ease-smooth-out) var(--reveal-delay, 0ms),
+      translate var(--duration-very-slow) var(--ease-smooth-out) var(--reveal-delay, 0ms),
+      transform var(--duration-fast) var(--ease-smooth-out),
+      box-shadow var(--duration-fast) var(--ease-smooth-out);
+  }
+
+  .item-card:not(.item-card--skeleton):hover {
+    transform: translateY(calc(var(--distance-micro) * -1));
+    box-shadow: 0 14px 24px -16px var(--color-lift-shadow);
+    animation: tag-swing var(--duration-very-slow) var(--ease-in-out);
+  }
+
+  .item-card .item-photo {
+    transition: scale var(--duration-slow) var(--ease-smooth-out);
+  }
+
+  .item-card:not(.item-card--skeleton):hover .item-photo {
+    scale: 1.04;
+  }
+}
+
+@keyframes tag-swing {
+  35% {
+    rotate: -1.2deg;
+  }
+
+  70% {
+    rotate: 0.5deg;
+  }
+}

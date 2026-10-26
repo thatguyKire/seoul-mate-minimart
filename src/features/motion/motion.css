@@ -1,0 +1,72 @@
+/*
+ * Shared motion (D-038). Tokens are in index.css, and index.css also switches every animation
+ * and transition off when the visitor prefers reduced motion. Hidden starting states live only
+ * in keyframes or behind html[data-motion='rich'], so with motion off everything is visible.
+ *
+ * Rich motion (entrances, scroll reveals, hover effects) is for desktops with a mouse:
+ *   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)
+ * motion.ts sets html[data-motion='rich'] from the same query.
+ */
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--distance-medium);
+    filter: blur(var(--blur-medium));
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    translate: 0 var(--distance-medium);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    scale: var(--scale-pop);
+  }
+}
+
+/* Scroll reveal: motion.ts marks elements pending, then shown once they scroll into view. */
+html[data-motion='rich'] [data-reveal] {
+  transition:
+    opacity var(--duration-very-slow) var(--ease-smooth-out) var(--reveal-delay, 0ms),
+    translate var(--duration-very-slow) var(--ease-smooth-out) var(--reveal-delay, 0ms);
+}
+
+html[data-motion='rich'] [data-reveal='pending'] {
+  opacity: 0;
+  translate: 0 var(--distance-medium);
+}
+
+/* Press feedback on button-like controls, phones included. */
+.icon-button,
+.menu-button,
+.theme-toggle,
+.language-switcher__button,
+.filter__link {
+  transition:
+    background-color var(--duration-quick) var(--ease-out),
+    border-color var(--duration-quick) var(--ease-out),
+    color var(--duration-quick) var(--ease-out),
+    scale var(--duration-micro) var(--ease-out);
+}
+
+.button:active:not(:disabled),
+.icon-button:active,
+.menu-button:active,
+.theme-toggle:active,
+.language-switcher__button:active,
+.filter__link:active {
+  scale: var(--scale-medium);
+}
+
+/* Switching between light and dark cross-fades the page (ThemeToggle). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-medium);
+  animation-timing-function: var(--ease-in-out);
+}

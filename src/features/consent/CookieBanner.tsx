@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useLocale } from '../i18n/localeContext';
-import { chooseConsent, useConsent } from './consent';
+import { motionMs } from '../motion/motion';
+import { chooseConsent, useConsent, type ConsentChoice } from './consent';
 
 /**
  * The privacy banner (FR-54): short text, Accept and Decline of equal size and style, and a
@@ -9,13 +11,36 @@ import { chooseConsent, useConsent } from './consent';
  * floating stack, so it never covers the contact or back to top buttons (FR-65).
  */
 export function CookieBanner() {
+  const { bannerOpen } = useConsent();
+  // Mounted afresh each time it opens, so a banner reopened from the footer starts over.
+  return bannerOpen ? <Banner /> : null;
+}
+
+function Banner() {
   const { t } = useTranslation();
   const locale = useLocale();
-  const { bannerOpen } = useConsent();
-  if (!bannerOpen) return null;
+  const [leaving, setLeaving] = useState(false);
+
+  // The banner drops away first, then the choice is recorded and it is removed (D-038).
+  function choose(choice: ConsentChoice) {
+    if (leaving) return;
+    const wait = motionMs('--duration-fast');
+    if (wait === 0) {
+      chooseConsent(choice);
+      return;
+    }
+    setLeaving(true);
+    window.setTimeout(() => {
+      chooseConsent(choice);
+    }, wait);
+  }
 
   return (
-    <section className="consent" aria-labelledby="consent-title">
+    <section
+      className="consent"
+      aria-labelledby="consent-title"
+      {...(leaving ? { 'data-leaving': '' } : {})}
+    >
       <h2 id="consent-title" className="consent__title">
         {t('consent.title')}
       </h2>
@@ -27,7 +52,7 @@ export function CookieBanner() {
           type="button"
           className="button button--consent"
           onClick={() => {
-            chooseConsent('accepted');
+            choose('accepted');
           }}
         >
           {t('consent.accept')}
@@ -36,7 +61,7 @@ export function CookieBanner() {
           type="button"
           className="button button--consent"
           onClick={() => {
-            chooseConsent('declined');
+            choose('declined');
           }}
         >
           {t('consent.decline')}
