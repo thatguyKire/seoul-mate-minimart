@@ -21,11 +21,13 @@ export default defineConfig({
     { name: 'mobile', use: { ...devices['Pixel 7'], ...browser } },
     { name: 'desktop', use: { ...devices['Desktop Chrome'], ...browser } },
   ],
-  // Tests run against the production build: run `npm run build` first.
+  // Tests run against the production build: run `npm run build:e2e` first. The preview server
+  // sends the site's real security headers (SDD 5.5).
   // On Windows, Playwright takes about two minutes to stop a server it started, so run
   // `npm run preview:e2e` in another terminal first; the tests then reuse that server.
   webServer: {
-    command: 'node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4173 --strictPort',
+    command:
+      'node node_modules/vite/bin/vite.js preview --mode e2e --host 127.0.0.1 --port 4173 --strictPort',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !isCI,
   },

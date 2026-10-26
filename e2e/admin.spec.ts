@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { FakeSupabase, staffLogin, validMfaCode, visitorLogin } from './support/fakeSupabase';
 import { photoWithLocation } from './support/photos';
 

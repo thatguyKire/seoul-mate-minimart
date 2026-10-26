@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { FakeSupabase } from './support/fakeSupabase';
 
 test.describe('accessibility (NFR-ACC-01 to NFR-ACC-03)', () => {

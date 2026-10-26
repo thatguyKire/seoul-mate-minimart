@@ -3,6 +3,10 @@
 // (SDD 5.6, BACKEND-SCHEMA 2).
 import { z } from 'zod';
 
+// Before any schema exists: Zod's fast parsers use `new Function`, which the
+// Content-Security-Policy forbids, and even its check for that is reported (D-039).
+z.config({ jitless: true });
+
 export type ErrorCode =
   | 'required'
   | 'nameRequired'

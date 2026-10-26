@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { FakeSupabase } from './support/fakeSupabase';
 
 function card(page: Page, name: string) {

@@ -26,6 +26,7 @@ src/
   lib/          Supabase client, Sentry setup, formatting, shared Zod schemas
   config/       Store facts (address, hours, phone, links)
 public/         theme-init.js, favicons, web manifest
+hosting/        Security headers and caching rules for any host (D-039)
 supabase/
   migrations/   Database changes, in order
   functions/    contact/, messenger-webhook/ (Deferred)
@@ -293,11 +294,11 @@ Policies, privileges and functions are in [BACKEND-SCHEMA 3 and 4](BACKEND-SCHEM
 
 ### 5.5 Headers and Content Security Policy
 
-Set by the host once chosen (NFR-SEC-11). `<project>` and the Sentry host are filled in per environment; the analytics origin is added when a provider is chosen.
+The values live in [`hosting/headers.ts`](../hosting/headers.ts), with the caching rules from [ARCHITECTURE 5](ARCHITECTURE.md#5-caching) ([D-039](DECISIONS.md#d-039-security-headers-live-in-one-file-and-the-preview-server-enforces-them-before-a-host-exists)). The host sends them from step 10 (NFR-SEC-11). Until then the local preview server sends them, so every end-to-end test runs under the real policy and fails on any violation; the dev server sends all but the Content-Security-Policy. `<project>` comes from each build's `VITE_SUPABASE_URL`, the Sentry host is added in step 10, and the analytics origin when a provider is chosen.
 
 | Header | Value |
 |---|---|
-| `Content-Security-Policy` | `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: https://<project>.supabase.co; font-src 'self'; connect-src 'self' https://<project>.supabase.co wss://<project>.supabase.co https://<sentry ingest host>; manifest-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests` |
+| `Content-Security-Policy` | `default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: https://<project>.supabase.co; font-src 'self'; connect-src 'self' https://<project>.supabase.co wss://<project>.supabase.co https://<sentry ingest host>; manifest-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'; upgrade-insecure-requests`, the last only for https sites |
 | `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` |
 | `X-Content-Type-Options` | `nosniff` |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
@@ -305,7 +306,9 @@ Set by the host once chosen (NFR-SEC-11). `<project>` and the Sentry host are fi
 | `X-Frame-Options` | `DENY`, for older browsers that ignore `frame-ancestors` |
 | `Cross-Origin-Opener-Policy` | `same-origin` |
 
-`data:` in `img-src` is for the two-factor QR code, an SVG image that cannot run scripts inside `<img>` ([D-035](DECISIONS.md#d-035-images-from-data-addresses-are-allowed-for-the-two-factor-qr-code)).
+`data:` in `img-src` is for the two-factor QR code, an SVG image that cannot run scripts inside `<img>` ([D-035](DECISIONS.md#d-035-images-from-data-addresses-are-allowed-for-the-two-factor-qr-code)). Nothing needs `'unsafe-eval'` or `'unsafe-inline'`: Zod runs `jitless`, styles set from code go through `element.style`, which the policy allows, and the theme cross-fade uses the View Transitions API.
+
+`e2e/security.spec.ts` checks the headers on every page and file type, that injected inline scripts and styles, outside scripts and outside requests are blocked, and that another site cannot show the page in a frame.
 
 The `contact` function sends `Access-Control-Allow-Origin` with the exact site origin from an allowlist per environment, and `Vary: Origin` (NFR-SEC-12).
 
@@ -315,6 +318,7 @@ The `contact` function sends `Access-Control-Allow-Origin` with the exact site o
 - Functions: the same schemas, strict, applied to every request (NFR-SEC-09).
 - Database API writes: column types and check constraints are the server-side schema ([BACKEND-SCHEMA 2](BACKEND-SCHEMA.md#2-tables)).
 - Output: React escapes all text. ESLint fails the build on `dangerouslySetInnerHTML` and on direct `innerHTML` use (NFR-SEC-10).
+- Tests type HTML, script and SQL strings into the search, the address, the contact form, the staff login and the item and category forms, and check that they are stored as typed, shown as text and never run: against the fake Supabase, and for the item form in CI against the real database too ([BRIEF 8](BRIEF.md#8-definition-of-done)).
 
 ### 5.7 Secrets
 
@@ -326,7 +330,7 @@ The `contact` function sends `Access-Control-Allow-Origin` with the exact site o
 | IP hash salt, Meta app secret, verify token, Page token | No | Edge Function secrets |
 | Supabase access token, database passwords, Sentry auth token | No | GitHub Actions secrets |
 
-CI fails if the built bundle contains a service role key or any other known secret pattern (NFR-SEC-06).
+CI fails if the built bundle contains a service role key, any other known secret pattern, or the value of any secret setting present while the check runs (NFR-SEC-06). It checks the production build, and the end-to-end build in the job where the local stack's service role key and the function's salt are set.
 
 ### 5.8 Rate limits
 
@@ -340,7 +344,7 @@ CI fails if the built bundle contains a service role key or any other known secr
 
 ### 5.9 Supply chain
 
-Committed lockfile, `npm audit` in CI failing on high or critical issues, Dependabot for npm and GitHub Actions, Actions pinned to commit hashes, and a dependency added only when it is maintained and clearly needed (NFR-SEC-18).
+Committed lockfile, `npm audit` in CI failing on high or critical issues, `npm audit signatures` checking the registry's signatures, Dependabot for npm and GitHub Actions, Actions pinned to commit hashes, and a dependency added only when it is maintained and clearly needed (NFR-SEC-18). `npm run check:maintained` fails CI when a direct dependency has had no activity on npm for 12 months, unless a decision allows it.
 
 ## 6. Error handling and logging
 

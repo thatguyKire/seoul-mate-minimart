@@ -3,6 +3,10 @@
 // refused. Imported with a ".ts" extension so Deno can load it as well as Vite.
 import { z } from 'zod';
 
+// Before any schema exists: Zod's fast parsers use `new Function`, which the site's
+// Content-Security-Policy forbids, and even its check for that is reported (D-039).
+z.config({ jitless: true });
+
 export const contactLimits = {
   /** Larger request bodies are refused with 413 before they are read as JSON. */
   maxBodyBytes: 8 * 1024,

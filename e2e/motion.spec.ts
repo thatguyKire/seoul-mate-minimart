@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from './support/test';
 import { FakeSupabase } from './support/fakeSupabase';
 
 // Motion (D-038, NFR-ACC-04). Every other spec runs with reduced motion; these switch it on.

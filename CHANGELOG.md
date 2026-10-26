@@ -36,9 +36,14 @@ All notable changes to this project are recorded here. The format follows [Keep 
 - Back to top button, a scroll progress bar on the menu and legal pages, page titles, a print layout for the menu, PNG icons, an Apple touch icon and a web manifest.
 - Contact form for visitors without Messenger, with inline errors, a summary and a thank-you message; the `contact` Edge Function checks origin, size and fields, drops bots through a hidden field, and allows 5 messages per address per 10 minutes.
 - Staff messages page: contact form messages, newest first, with tap-to-call and email links.
+- Security headers and a strict Content-Security-Policy in one host-neutral file, `hosting/headers.ts`, with the caching rules for the host; the local preview server sends them.
+- Security tests: every end-to-end test fails if its page breaks the policy; injected scripts, styles, outside scripts, outside requests and framing by another site are shown to be blocked; code typed into the address, the staff login, the item and category forms and the contact function is stored as typed and shown as text, for the item form also against the real database in CI.
+- CI checks the registry signatures of installed packages, that every direct dependency had activity on npm in the last 12 months, and the end-to-end build for secrets too.
 - Motion: on desktop, the hero rises in, sections and menu cards fade up as they scroll into view, and cards lift and swing on hover; on every screen, the mobile menu slides, FAQ answers open smoothly, the privacy banner rises and drops away, buttons give press feedback, the theme cross-fades and the thank-you check draws itself. All of it is off for visitors who prefer reduced motion.
 
 ### Changed
 
+- The production build check also looks for Supabase access tokens and for the values of secret settings present while it runs, and has its own tests.
+- Zod runs without its `new Function` fast path, which the Content-Security-Policy forbids.
 - Printing the menu leaves out the contact form, as it does the other sections.
 - Items record their photo format, so the menu asks for the right files (migration `20261019120000_photo_format.sql`).

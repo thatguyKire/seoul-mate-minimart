@@ -3,7 +3,7 @@
 // (FR-07), Realtime delivers menu_state changes to the anonymous role (FR-06, D-020), and
 // real staff logins, writes and photo uploads pass the database's and storage's own rules.
 // CI creates the two logins with scripts/create-local-staff.mjs before these run.
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { photoWithLocation } from './support/photos';
 
 const url = process.env.VITE_SUPABASE_URL ?? '';
@@ -251,4 +251,45 @@ test('the function refuses other sites, drops bots and limits each address (NFR-
   expect(limited.status).toBe(429);
   expect(Number(limited.headers.get('retry-after'))).toBeGreaterThan(0);
   expect(await storedMessages('Rate Test')).toHaveLength(4);
+});
+
+test('code typed by staff is stored as typed and shown as text (BRIEF 8, NFR-SEC-04, -10)', async ({
+  context,
+}) => {
+  const name = `<img src=x onerror=alert(1)>'); DROP TABLE items; --`;
+  const description = `' OR '1'='1' --<script>alert(2)</script>`;
+  const page = await context.newPage();
+  let dialogs = 0;
+  context.on('dialog', (dialog) => {
+    dialogs += 1;
+    void dialog.dismiss();
+  });
+  await logIn(page, staff);
+  try {
+    await page.getByRole('link', { name: 'Add item' }).click();
+    const english = page.getByRole('group', { name: 'English (required)' });
+    await english.getByLabel('Name').fill(name);
+    await english.getByLabel('Description').fill(description);
+    await page.getByLabel('Category').selectOption({ label: 'Instant Noodles' });
+    await page.getByLabel('Price in pesos').fill('10');
+    await page.getByLabel('Show on the menu').check();
+    await page.getByRole('button', { name: 'Save item' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Saved' })).toHaveText(
+      `Saved ${name}.`,
+    );
+    expect(await readItem(name)).toMatchObject({ name_en: name, description_en: description });
+
+    const visitor = await context.newPage();
+    await visitor.goto('/en/?category=instant-noodles');
+    await expect(card(visitor, name)).toContainText(description);
+    await expect(visitor.locator('img[src="x"], script:not([src])')).toHaveCount(0);
+    // The table is still there, with the seed items.
+    const items = await serviceRequest('/rest/v1/items?select=id', { method: 'GET' });
+    expect(((await items.json()) as unknown[]).length).toBeGreaterThan(1);
+    expect(dialogs).toBe(0);
+  } finally {
+    await serviceRequest(`/rest/v1/items?name_en=eq.${encodeURIComponent(name)}`, {
+      method: 'DELETE',
+    });
+  }
 });
