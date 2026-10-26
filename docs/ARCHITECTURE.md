@@ -101,7 +101,7 @@ flowchart TB
 
 ## 4. Hosting
 
-Deferred by the owner ([D-003](DECISIONS.md#d-003-hosting-deferred)). The checklist the host must meet is in [TRD 2.1](TRD.md#21-what-the-host-must-support). Until then the build stays host-neutral: a `dist/` folder of static files, with headers and caching rules kept in one config file in the repository and translated to the chosen host's format in step 10.
+Deferred by the owner ([D-003](DECISIONS.md#d-003-hosting-deferred)). The checklist the host must meet is in [TRD 2.1](TRD.md#21-what-the-host-must-support). Until then the build stays host-neutral: a `dist/` folder of static files, with headers and caching rules kept in one file in the repository, [`hosting/headers.ts`](../hosting/headers.ts), and translated to the chosen host's format in step 10 ([D-039](DECISIONS.md#d-039-security-headers-live-in-one-file-and-the-preview-server-enforces-them-before-a-host-exists)).
 
 ## 5. Caching
 

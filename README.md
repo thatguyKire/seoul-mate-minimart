@@ -49,7 +49,7 @@ Server secrets never go in `.env` files for the frontend. Where they live is in 
 | `npm run dev` | Dev server with hot reload |
 | `npm run build` | Typecheck, then production build into `dist/` |
 | `npm run build:e2e` | The same build, pointed at the local Supabase address, for end-to-end tests |
-| `npm run preview` | Serve the production build locally |
+| `npm run preview` | Serve the production build locally, with the site's security headers |
 | `npm run lint` | ESLint, failing on any warning |
 | `npm run format` / `format:check` | Format with Prettier / check formatting |
 | `npm run typecheck` | TypeScript checks |
@@ -57,6 +57,7 @@ Server secrets never go in `.env` files for the frontend. Where they live is in 
 | `npm run test:e2e` | End-to-end tests (Playwright) against the production build |
 | `node scripts/generate-icons.mjs` | Render the PNG icons in `public/` from `public/favicon.svg`, after the favicon changes |
 | `npm run check:bundle` | Fails on source maps, secrets, or initial JavaScript over budget |
+| `npm run check:maintained` | Fails when a direct dependency has had no activity on npm for 12 months |
 | `npm run audit` | Dependency audit, failing on high or critical issues |
 | `npm run db:start` / `db:stop` | Start or stop the local Supabase stack (needs Docker) |
 | `npm run db:reset` | Rebuild the local database from migrations and sample data |
@@ -65,7 +66,7 @@ Server secrets never go in `.env` files for the frontend. Where they live is in 
 | `npm run db:lint` | Check database functions for errors |
 | `npm run db:staff -- <email> <password>` | Create a staff login on the local stack only; refuses any other database ([D-028](docs/DECISIONS.md#d-028-no-staff-account-in-seed-data)) |
 
-End-to-end tests on Windows: run `npm run build:e2e`, start `npm run preview:e2e` in a second terminal, then run `npm run test:e2e`. Locally they use the installed Microsoft Edge, so no browser download is needed. The tests answer Supabase requests themselves, so they need no Docker; `e2e/live-stack.spec.ts`, which needs a real local stack, runs in CI only ([D-031](docs/DECISIONS.md#d-031-end-to-end-tests-use-a-fake-supabase-plus-one-live-stack-test-in-ci)).
+End-to-end tests on Windows: run `npm run build:e2e`, start `npm run preview:e2e` in a second terminal, then run `npm run test:e2e`. The preview server sends the site's real security headers, and any test whose page breaks the Content-Security-Policy fails ([D-039](docs/DECISIONS.md#d-039-security-headers-live-in-one-file-and-the-preview-server-enforces-them-before-a-host-exists)). Locally they use the installed Microsoft Edge, so no browser download is needed. The tests answer Supabase requests themselves, so they need no Docker; `e2e/live-stack.spec.ts`, which needs a real local stack, runs in CI only ([D-031](docs/DECISIONS.md#d-031-end-to-end-tests-use-a-fake-supabase-plus-one-live-stack-test-in-ci)).
 
 To see the site with data in `npm run dev`, put a Supabase project URL and anon (publishable) key in `.env.local`: the staging project's, from its dashboard under Project Settings, API Keys, or a local stack's (`npm run db:start`, needs Docker). Set `VITE_APP_ENV=staging` for the staging project. Without them the menu shows its error state.
 

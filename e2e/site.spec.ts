@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { FakeSupabase } from './support/fakeSupabase';
 
 async function storageKeys(page: Page) {
