@@ -54,6 +54,14 @@ describe('contact function (SDD 3.2)', () => {
     });
   });
 
+  it('passes code in a message on as plain data, for a parameterized insert (BRIEF 8)', async () => {
+    const { deps, handle } = setup();
+    const message = "'); DROP TABLE contact_messages; --\n<script>alert(1)</script>";
+    const response = await handle(post({ ...valid, message }));
+    expect(response.status).toBe(200);
+    expect(deps.insert).toHaveBeenCalledWith(expect.objectContaining({ message }));
+  });
+
   it('refuses other origins, before reading anything (NFR-SEC-12)', async () => {
     const { deps, handle } = setup();
     const response = await handle(post(valid, { origin: 'https://evil.example' }));

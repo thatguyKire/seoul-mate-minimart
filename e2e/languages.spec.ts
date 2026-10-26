@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { FakeSupabase } from './support/fakeSupabase';
 
 test.describe('first visit to the root (FR-20)', () => {

@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
+import { securityHeaders } from './hosting/headers';
 
 /**
  * FR-33: a production build fails while any FAQ entry is still a placeholder marked "todo".
@@ -39,9 +40,22 @@ export default defineConfig(({ mode }) => {
     process.env.VITE_SUPABASE_ANON_KEY ??= 'e2e-placeholder-key';
     process.env.VITE_APP_ENV ??= 'local';
   }
+  const env = loadEnv(mode, process.cwd(), 'VITE_');
+
+  // SDD 5.5: the preview server sends the site's real headers, for the Supabase project this
+  // mode's build talks to, so the end-to-end tests run under the real policy. Run it in the
+  // same mode as the build: `vite preview --mode e2e` after `npm run build:e2e`.
+  const headers = securityHeaders({ supabaseUrl: env.VITE_SUPABASE_URL, https: false });
+  // The dev server leaves the policy out, because Vite's live reloading injects the inline
+  // scripts and styles that it forbids (D-039).
+  const devHeaders = Object.fromEntries(
+    Object.entries(headers).filter(([name]) => name !== 'Content-Security-Policy'),
+  );
 
   return {
-    plugins: [react(), faqReadyForProduction(loadEnv(mode, process.cwd(), 'VITE_').VITE_APP_ENV)],
+    plugins: [react(), faqReadyForProduction(env.VITE_APP_ENV)],
+    server: { headers: devHeaders },
+    preview: { headers },
     build: {
       // No public source maps (NFR-SEC-07). Step 10 uploads hidden maps to Sentry from CI.
       sourcemap: false,
@@ -55,7 +69,12 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.ts'],
-      include: ['src/**/*.test.{ts,tsx}', 'supabase/functions/**/*.test.ts'],
+      include: [
+        'src/**/*.test.{ts,tsx}',
+        'supabase/functions/**/*.test.ts',
+        'hosting/**/*.test.ts',
+        'scripts/**/*.test.mjs',
+      ],
     },
   };
 });

@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { FakeSupabase, staffLogin } from './support/fakeSupabase';
 
 async function fillForm(page: Page, fields: { name: string; contact: string; message: string }) {
